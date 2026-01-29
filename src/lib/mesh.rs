@@ -217,15 +217,15 @@ impl Mesh {
     pub fn new_cube() -> Mesh {
         let mut mesh = Mesh::new();
 
-        // 8 vertices of a cube centered at origin
-        mesh.add_vert(Coord3D::new(-1.0, -1.0, -1.0)); // 0: front bottom left
-        mesh.add_vert(Coord3D::new(1.0, -1.0, -1.0)); // 1: front bottom right
-        mesh.add_vert(Coord3D::new(1.0, 1.0, -1.0)); // 2: front top right
-        mesh.add_vert(Coord3D::new(-1.0, 1.0, -1.0)); // 3: front top left
-        mesh.add_vert(Coord3D::new(-1.0, -1.0, 1.0)); // 4: back bottom left
-        mesh.add_vert(Coord3D::new(1.0, -1.0, 1.0)); // 5: back bottom right
-        mesh.add_vert(Coord3D::new(1.0, 1.0, 1.0)); // 6: back top right
-        mesh.add_vert(Coord3D::new(-1.0, 1.0, 1.0)); // 7: back top left
+        // 8 vertices of a box centered at origin (0.5 tall, 2.0 long in z)
+        mesh.add_vert(Coord3D::new(-1.0, -0.25, -1.0)); // 0: front bottom left
+        mesh.add_vert(Coord3D::new(1.0, -0.25, -1.0)); // 1: front bottom right
+        mesh.add_vert(Coord3D::new(1.0, 0.25, -1.0)); // 2: front top right
+        mesh.add_vert(Coord3D::new(-1.0, 0.25, -1.0)); // 3: front top left
+        mesh.add_vert(Coord3D::new(-1.0, -0.25, 1.0)); // 4: back bottom left
+        mesh.add_vert(Coord3D::new(1.0, -0.25, 1.0)); // 5: back bottom right
+        mesh.add_vert(Coord3D::new(1.0, 0.25, 1.0)); // 6: back top right
+        mesh.add_vert(Coord3D::new(-1.0, 0.25, 1.0)); // 7: back top left
 
         // 12 edges of the cube
         mesh.add_line((0, 1)); // 0: front bottom

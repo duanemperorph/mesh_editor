@@ -90,6 +90,7 @@ impl Panes {
 
 impl Panes {
     pub fn draw_borders(&self) {
+        set_default_camera();
         for border in self.borders.iter() {
             Self::draw_border_line(border);
         }
