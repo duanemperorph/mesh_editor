@@ -188,7 +188,9 @@ impl Mesh {
     }
 }
 
+//
 // Formatting
+//
 
 impl fmt::Display for Coord3D {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -203,5 +205,49 @@ impl fmt::Display for MirrorMode {
             Self::Bilateral => write!(formatter, "Bilateral"),
             Self::Radial(count) => write!(formatter, "Radial ({})", count),
         }
+    }
+}
+
+//
+// Test data
+//
+
+impl Mesh {
+    pub fn new_cube() -> Mesh {
+        let mut mesh = Mesh::new();
+
+        // 8 vertices of a cube centered at origin
+        mesh.add_vert(Coord3D::new(-1.0, -1.0, -1.0)); // 0: front bottom left
+        mesh.add_vert(Coord3D::new(1.0, -1.0, -1.0)); // 1: front bottom right
+        mesh.add_vert(Coord3D::new(1.0, 1.0, -1.0)); // 2: front top right
+        mesh.add_vert(Coord3D::new(-1.0, 1.0, -1.0)); // 3: front top left
+        mesh.add_vert(Coord3D::new(-1.0, -1.0, 1.0)); // 4: back bottom left
+        mesh.add_vert(Coord3D::new(1.0, -1.0, 1.0)); // 5: back bottom right
+        mesh.add_vert(Coord3D::new(1.0, 1.0, 1.0)); // 6: back top right
+        mesh.add_vert(Coord3D::new(-1.0, 1.0, 1.0)); // 7: back top left
+
+        // 12 edges of the cube
+        mesh.add_line((0, 1)); // 0: front bottom
+        mesh.add_line((1, 2)); // 1: front right
+        mesh.add_line((2, 3)); // 2: front top
+        mesh.add_line((3, 0)); // 3: front left
+        mesh.add_line((4, 5)); // 4: back bottom
+        mesh.add_line((5, 6)); // 5: back right
+        mesh.add_line((6, 7)); // 6: back top
+        mesh.add_line((7, 4)); // 7: back left
+        mesh.add_line((0, 4)); // 8: bottom left
+        mesh.add_line((1, 5)); // 9: bottom right
+        mesh.add_line((2, 6)); // 10: top right
+        mesh.add_line((3, 7)); // 11: top left
+
+        // 6 faces of the cube
+        mesh.add_poly(vec![0, 1, 2, 3]); // front
+        mesh.add_poly(vec![4, 5, 6, 7]); // back
+        mesh.add_poly(vec![0, 9, 4, 8]); // bottom
+        mesh.add_poly(vec![2, 10, 6, 11]); // top
+        mesh.add_poly(vec![3, 8, 7, 11]); // left
+        mesh.add_poly(vec![1, 9, 5, 10]); // right
+
+        mesh
     }
 }

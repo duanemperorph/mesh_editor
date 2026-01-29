@@ -7,7 +7,7 @@ use status_text::*;
 
 #[macroquad::main("Mesh Editor")]
 async fn main() {
-    let mut current_mesh = MeshData::new();
+    let mut current_mesh = MeshData::new_cube();
     let mut editor_state = EditorState::new();
 
     loop {
