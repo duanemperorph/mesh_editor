@@ -22,7 +22,7 @@
 //     lines: Vec<Line>,
 // }
 
-use crate::mesh::{Coord3D, Line, Mesh};
+use crate::mesh::{Coord3D, Line, Mesh, Poly};
 
 #[cfg(test)]
 mod tests {
@@ -292,5 +292,267 @@ mod tests {
 
         mesh.remove_line(0);
         assert_eq!(mesh.lines().len(), 0);
+    }
+
+    // ==================== add_poly tests ====================
+
+    // Helper to create a triangle mesh with 3 vertices and 3 lines
+    fn triangle_mesh() -> Mesh {
+        let mut mesh = empty_mesh();
+        mesh.add_vert(coord(0.0, 0.0, 0.0));
+        mesh.add_vert(coord(1.0, 0.0, 0.0));
+        mesh.add_vert(coord(0.5, 1.0, 0.0));
+        mesh.add_line((0, 1));
+        mesh.add_line((1, 2));
+        mesh.add_line((2, 0));
+        mesh
+    }
+
+    #[test]
+    fn test_add_valid_poly() {
+        let mut mesh = triangle_mesh();
+        let result = mesh.add_poly(vec![0, 1, 2]);
+        assert!(result.is_some());
+        assert_eq!(mesh.polys().len(), 1);
+    }
+
+    #[test]
+    fn test_add_poly_returns_indices() {
+        let mut mesh = triangle_mesh();
+        mesh.add_poly(vec![0, 1, 2]);
+        let poly = mesh.polys().get(0).unwrap();
+        assert_eq!(poly, &vec![0, 1, 2]);
+    }
+
+    #[test]
+    fn test_add_multiple_polys() {
+        let mut mesh = empty_mesh();
+        // Create a quad with 4 vertices and 5 lines (4 edges + 1 diagonal)
+        mesh.add_vert(coord(0.0, 0.0, 0.0));
+        mesh.add_vert(coord(1.0, 0.0, 0.0));
+        mesh.add_vert(coord(1.0, 1.0, 0.0));
+        mesh.add_vert(coord(0.0, 1.0, 0.0));
+        mesh.add_line((0, 1)); // line 0
+        mesh.add_line((1, 2)); // line 1
+        mesh.add_line((2, 3)); // line 2
+        mesh.add_line((3, 0)); // line 3
+        mesh.add_line((0, 2)); // line 4 (diagonal)
+
+        // Two triangles sharing the diagonal
+        mesh.add_poly(vec![0, 1, 4]);
+        mesh.add_poly(vec![2, 3, 4]);
+        assert_eq!(mesh.polys().len(), 2);
+    }
+
+    #[test]
+    fn test_add_poly_with_less_than_3_lines_fails() {
+        let mut mesh = triangle_mesh();
+        let result = mesh.add_poly(vec![0, 1]);
+        assert!(result.is_none());
+        assert_eq!(mesh.polys().len(), 0);
+    }
+
+    #[test]
+    fn test_add_poly_with_invalid_line_index_fails() {
+        let mut mesh = triangle_mesh();
+        let result = mesh.add_poly(vec![0, 1, 999]);
+        assert!(result.is_none());
+        assert_eq!(mesh.polys().len(), 0);
+    }
+
+    #[test]
+    fn test_add_poly_with_duplicate_indices_fails() {
+        let mut mesh = triangle_mesh();
+        let result = mesh.add_poly(vec![0, 1, 1]);
+        assert!(result.is_none());
+        assert_eq!(mesh.polys().len(), 0);
+    }
+
+    #[test]
+    fn test_add_poly_empty_fails() {
+        let mut mesh = triangle_mesh();
+        let result = mesh.add_poly(vec![]);
+        assert!(result.is_none());
+        assert_eq!(mesh.polys().len(), 0);
+    }
+
+    // ==================== remove_poly tests ====================
+
+    #[test]
+    fn test_remove_poly() {
+        let mut mesh = triangle_mesh();
+        mesh.add_poly(vec![0, 1, 2]);
+        let removed = mesh.remove_poly(0);
+        assert!(removed.is_some());
+        assert_eq!(removed.unwrap(), vec![0, 1, 2]);
+        assert_eq!(mesh.polys().len(), 0);
+    }
+
+    #[test]
+    fn test_remove_poly_invalid_index() {
+        let mut mesh = triangle_mesh();
+        mesh.add_poly(vec![0, 1, 2]);
+        let removed = mesh.remove_poly(999);
+        assert!(removed.is_none());
+        assert_eq!(mesh.polys().len(), 1);
+    }
+
+    #[test]
+    fn test_remove_poly_from_empty_mesh() {
+        let mut mesh = empty_mesh();
+        let removed = mesh.remove_poly(0);
+        assert!(removed.is_none());
+    }
+
+    #[test]
+    fn test_remove_poly_swap_remove_behavior() {
+        let mut mesh = empty_mesh();
+        // Create 4 vertices and 4 lines for two separate triangles
+        mesh.add_vert(coord(0.0, 0.0, 0.0));
+        mesh.add_vert(coord(1.0, 0.0, 0.0));
+        mesh.add_vert(coord(0.5, 1.0, 0.0));
+        mesh.add_vert(coord(2.0, 0.0, 0.0));
+        mesh.add_line((0, 1)); // line 0
+        mesh.add_line((1, 2)); // line 1
+        mesh.add_line((2, 0)); // line 2
+        mesh.add_line((1, 3)); // line 3
+        mesh.add_line((3, 2)); // line 4
+
+        mesh.add_poly(vec![0, 1, 2]); // poly 0
+        mesh.add_poly(vec![1, 3, 4]); // poly 1
+
+        // Remove first poly - second poly should be swapped to index 0
+        mesh.remove_poly(0);
+        assert_eq!(mesh.polys().len(), 1);
+        assert_eq!(mesh.polys().get(0).unwrap(), &vec![1, 3, 4]);
+    }
+
+    // ==================== remove_line affecting polys tests ====================
+
+    #[test]
+    fn test_remove_line_removes_reference_from_poly() {
+        let mut mesh = empty_mesh();
+        // Create a quad (4 lines)
+        mesh.add_vert(coord(0.0, 0.0, 0.0));
+        mesh.add_vert(coord(1.0, 0.0, 0.0));
+        mesh.add_vert(coord(1.0, 1.0, 0.0));
+        mesh.add_vert(coord(0.0, 1.0, 0.0));
+        mesh.add_line((0, 1)); // line 0
+        mesh.add_line((1, 2)); // line 1
+        mesh.add_line((2, 3)); // line 2
+        mesh.add_line((3, 0)); // line 3
+
+        mesh.add_poly(vec![0, 1, 2, 3]);
+
+        // Remove line 0 - swap_remove moves line 3 to index 0
+        // Poly should have 3 lines: original indices 1, 2, 3
+        // After remapping: 1, 2, and 3->0
+        mesh.remove_line(0);
+        assert_eq!(mesh.polys().len(), 1);
+        let poly = mesh.polys().get(0).unwrap();
+        assert_eq!(poly.len(), 3);
+        assert!(poly.contains(&0)); // was line 3, remapped to 0
+        assert!(poly.contains(&1));
+        assert!(poly.contains(&2));
+        assert!(!poly.contains(&3)); // no longer exists
+    }
+
+    #[test]
+    fn test_remove_line_deletes_poly_with_less_than_3_lines() {
+        let mut mesh = triangle_mesh();
+        mesh.add_poly(vec![0, 1, 2]);
+
+        // Remove one line from triangle - poly should be deleted (only 2 lines left)
+        mesh.remove_line(0);
+        assert_eq!(mesh.polys().len(), 0);
+    }
+
+    #[test]
+    fn test_remove_line_remaps_swapped_line_indices_in_poly() {
+        let mut mesh = empty_mesh();
+        // Create vertices and 4 lines
+        mesh.add_vert(coord(0.0, 0.0, 0.0));
+        mesh.add_vert(coord(1.0, 0.0, 0.0));
+        mesh.add_vert(coord(1.0, 1.0, 0.0));
+        mesh.add_vert(coord(0.0, 1.0, 0.0));
+        mesh.add_line((0, 1)); // line 0
+        mesh.add_line((1, 2)); // line 1
+        mesh.add_line((2, 3)); // line 2
+        mesh.add_line((3, 0)); // line 3
+
+        // Poly uses lines 1, 2, 3 (not line 0)
+        mesh.add_poly(vec![1, 2, 3]);
+
+        // Remove line 0 - line 3 will be swapped to index 0
+        // Poly should have line index 3 remapped to 0
+        mesh.remove_line(0);
+
+        let poly = mesh.polys().get(0).unwrap();
+        assert!(poly.contains(&0)); // was 3, now remapped to 0
+        assert!(poly.contains(&1));
+        assert!(poly.contains(&2));
+        assert!(!poly.contains(&3)); // no longer exists at index 3
+    }
+
+    #[test]
+    fn test_remove_line_affects_multiple_polys() {
+        let mut mesh = empty_mesh();
+        // Create 4 vertices and 5 lines (quad with diagonal)
+        mesh.add_vert(coord(0.0, 0.0, 0.0));
+        mesh.add_vert(coord(1.0, 0.0, 0.0));
+        mesh.add_vert(coord(1.0, 1.0, 0.0));
+        mesh.add_vert(coord(0.0, 1.0, 0.0));
+        mesh.add_line((0, 1)); // line 0
+        mesh.add_line((1, 2)); // line 1
+        mesh.add_line((2, 3)); // line 2
+        mesh.add_line((3, 0)); // line 3
+        mesh.add_line((0, 2)); // line 4 (diagonal)
+
+        // Two triangles sharing the diagonal
+        mesh.add_poly(vec![0, 1, 4]); // bottom-right triangle
+        mesh.add_poly(vec![2, 3, 4]); // top-left triangle
+
+        // Remove the diagonal - both polys should be deleted (only 2 lines each)
+        mesh.remove_line(4);
+        assert_eq!(mesh.polys().len(), 0);
+    }
+
+    #[test]
+    fn test_remove_line_keeps_valid_polys() {
+        let mut mesh = empty_mesh();
+        // Create 5 vertices and 6 lines (pentagon with one extra line)
+        mesh.add_vert(coord(0.0, 0.0, 0.0));
+        mesh.add_vert(coord(1.0, 0.0, 0.0));
+        mesh.add_vert(coord(1.5, 1.0, 0.0));
+        mesh.add_vert(coord(0.5, 1.5, 0.0));
+        mesh.add_vert(coord(-0.5, 1.0, 0.0));
+        mesh.add_line((0, 1)); // line 0
+        mesh.add_line((1, 2)); // line 1
+        mesh.add_line((2, 3)); // line 2
+        mesh.add_line((3, 4)); // line 3
+        mesh.add_line((4, 0)); // line 4
+        mesh.add_line((0, 3)); // line 5 (extra diagonal)
+
+        // Pentagon poly with 5 edges
+        mesh.add_poly(vec![0, 1, 2, 3, 4]);
+
+        // Remove the extra line (not part of poly)
+        mesh.remove_line(5);
+
+        // Poly should still exist with 5 lines
+        assert_eq!(mesh.polys().len(), 1);
+        assert_eq!(mesh.polys().get(0).unwrap().len(), 5);
+    }
+
+    #[test]
+    fn test_delete_vertex_cascades_to_polys() {
+        let mut mesh = triangle_mesh();
+        mesh.add_poly(vec![0, 1, 2]);
+
+        // Delete a vertex - this removes lines, which should cascade to poly removal
+        mesh.delete_vert(0);
+
+        // All lines referencing vertex 0 are removed, poly should be gone
+        assert_eq!(mesh.polys().len(), 0);
     }
 }

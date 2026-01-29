@@ -55,6 +55,10 @@ impl Mesh {
         &self.lines
     }
 
+    pub fn polys(&self) -> &Vec<Poly> {
+        &self.polys
+    }
+
     pub fn mirror_mode(&self) -> &MirrorMode {
         &self.mirror_mode
     }
