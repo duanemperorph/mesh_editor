@@ -1,5 +1,5 @@
 //
-//
+// editor_state -> managed dyanmic editor state (separate from mesh being edited)
 //
 
 use crate::mesh::{Coord3D, Line, LineIndex, Poly, PolyIndex, VertIndex};

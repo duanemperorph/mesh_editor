@@ -1,3 +1,7 @@
+//
+// status_text.rs -> draws the status text at the bottom
+//
+
 use macroquad::prelude::*;
 use mesh_editor::editor_state::*;
 use mesh_editor::mesh::{Mesh as MeshData, *};
