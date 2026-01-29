@@ -2,6 +2,7 @@
 //
 //
 use std::collections::HashSet;
+use std::fmt;
 
 pub type VertIndex = usize;
 pub type LineIndex = usize;
@@ -20,7 +21,7 @@ pub type Poly = Vec<LineIndex>;
 
 pub enum MirrorMode {
     None,
-    Split,
+    Bilateral,
     Radial(u32),
 }
 
@@ -40,14 +41,14 @@ impl Coord3D {
 impl Mesh {
     pub fn new() -> Mesh {
         return Mesh {
-            mirror_mode: MirrorMode::Split,
+            mirror_mode: MirrorMode::Bilateral,
             verticies: Vec::new(),
             lines: Vec::new(),
             polys: Vec::new(),
         };
     }
 
-    pub fn verticies(&self) -> &Vec<Coord3D> {
+    pub fn verts(&self) -> &Vec<Coord3D> {
         &self.verticies
     }
 
@@ -184,5 +185,23 @@ impl Mesh {
         }
 
         self.polys.retain(|poly| poly.len() > 2);
+    }
+}
+
+// Formatting
+
+impl fmt::Display for Coord3D {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "(x: {}, y: {}, z: {})", self.x, self.y, self.z)
+    }
+}
+
+impl fmt::Display for MirrorMode {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::None => write!(formatter, "None"),
+            Self::Bilateral => write!(formatter, "Bilateral"),
+            Self::Radial(count) => write!(formatter, "Radial ({})", count),
+        }
     }
 }

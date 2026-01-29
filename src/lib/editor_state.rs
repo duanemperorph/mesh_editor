@@ -5,6 +5,7 @@
 use crate::mesh::{Coord3D, Line, LineIndex, Poly, PolyIndex, VertIndex};
 
 pub enum Selection {
+    None,
     Verticies(Vec<VertIndex>),
     Lines(Vec<LineIndex>),
     Polys(Vec<PolyIndex>),
@@ -159,7 +160,7 @@ impl PanelStateRotateCam {
 impl EditorState {
     pub fn new() -> EditorState {
         EditorState {
-            selection: Selection::Verticies(Vec::new()),
+            selection: Selection::None,
             input_mode: InputMode::SingleSelect,
             panel_state_xz: PanelState2D::new(),
             panel_state_yz: PanelState2D::new(),
@@ -168,27 +169,51 @@ impl EditorState {
         }
     }
 
-    pub fn selection(&mut self) -> &mut Selection {
+    pub fn selection(&self) -> &Selection {
+        &self.selection
+    }
+
+    pub fn selection_mut(&mut self) -> &mut Selection {
         &mut self.selection
     }
 
-    pub fn input_mode(&mut self) -> &mut InputMode {
+    pub fn input_mode(&self) -> &InputMode {
+        &self.input_mode
+    }
+
+    pub fn input_mode_mut(&mut self) -> &mut InputMode {
         &mut self.input_mode
     }
 
-    pub fn panel_state_xz(&mut self) -> &mut PanelState2D {
+    pub fn panel_state_xz(&self) -> &PanelState2D {
+        &self.panel_state_xz
+    }
+
+    pub fn panel_state_xz_mut(&mut self) -> &mut PanelState2D {
         &mut self.panel_state_xz
     }
 
-    pub fn panel_state_yz(&mut self) -> &mut PanelState2D {
+    pub fn panel_state_yz(&self) -> &PanelState2D {
+        &self.panel_state_yz
+    }
+
+    pub fn panel_state_yz_mut(&mut self) -> &mut PanelState2D {
         &mut self.panel_state_yz
     }
 
-    pub fn panel_state_rotate_cam(&mut self) -> &mut PanelStateRotateCam {
+    pub fn panel_state_rotate_cam(&self) -> &PanelStateRotateCam {
+        &self.panel_state_rotate_cam
+    }
+
+    pub fn panel_state_rotate_cam_mut(&mut self) -> &mut PanelStateRotateCam {
         &mut self.panel_state_rotate_cam
     }
 
-    pub fn insert_preview(&mut self) -> &mut InsertPreview {
+    pub fn insert_preview(&self) -> &InsertPreview {
+        &self.insert_preview
+    }
+
+    pub fn insert_preview_mut(&mut self) -> &mut InsertPreview {
         &mut self.insert_preview
     }
 }

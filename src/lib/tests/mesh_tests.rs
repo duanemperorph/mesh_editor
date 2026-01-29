@@ -45,7 +45,7 @@ mod tests {
         let mut mesh = empty_mesh();
         let idx = mesh.add_vert(coord(1.0, 2.0, 3.0));
         assert_eq!(idx, 0);
-        assert_eq!(mesh.verticies().len(), 1);
+        assert_eq!(mesh.verts().len(), 1);
     }
 
     #[test]
@@ -58,7 +58,7 @@ mod tests {
         assert_eq!(idx0, 0);
         assert_eq!(idx1, 1);
         assert_eq!(idx2, 2);
-        assert_eq!(mesh.verticies().len(), 3);
+        assert_eq!(mesh.verts().len(), 3);
     }
 
     #[test]
@@ -66,7 +66,7 @@ mod tests {
         let mut mesh = empty_mesh();
         mesh.add_vert(coord(f32::MAX, f32::MIN, 0.0));
         mesh.add_vert(coord(-0.0, f32::INFINITY, f32::NEG_INFINITY));
-        assert_eq!(mesh.verticies().len(), 2);
+        assert_eq!(mesh.verts().len(), 2);
     }
 
     // ==================== update_vert tests ====================
@@ -77,7 +77,7 @@ mod tests {
         let idx = mesh.add_vert(coord(1.0, 2.0, 3.0));
         mesh.update_vert(idx, coord(4.0, 5.0, 6.0));
 
-        let updated = mesh.verticies().get(idx).unwrap();
+        let updated = mesh.verts().get(idx).unwrap();
         assert_eq!(updated.x, 4.0);
         assert_eq!(updated.y, 5.0);
         assert_eq!(updated.z, 6.0);
@@ -89,7 +89,7 @@ mod tests {
         mesh.add_vert(coord(1.0, 2.0, 3.0));
         // Should not panic, but should handle gracefully
         mesh.update_vert(999, coord(0.0, 0.0, 0.0));
-        assert_eq!(mesh.verticies().len(), 1);
+        assert_eq!(mesh.verts().len(), 1);
     }
 
     // ==================== delete_vert tests ====================
@@ -99,7 +99,7 @@ mod tests {
         let mut mesh = empty_mesh();
         let idx = mesh.add_vert(coord(1.0, 2.0, 3.0));
         mesh.delete_vert(idx);
-        assert_eq!(mesh.verticies().len(), 0);
+        assert_eq!(mesh.verts().len(), 0);
     }
 
     #[test]
@@ -107,14 +107,14 @@ mod tests {
         let mut mesh = empty_mesh();
         mesh.add_vert(coord(1.0, 2.0, 3.0));
         mesh.delete_vert(999);
-        assert_eq!(mesh.verticies().len(), 1);
+        assert_eq!(mesh.verts().len(), 1);
     }
 
     #[test]
     fn test_delete_from_empty_mesh() {
         let mut mesh = empty_mesh();
         mesh.delete_vert(0);
-        assert_eq!(mesh.verticies().len(), 0);
+        assert_eq!(mesh.verts().len(), 0);
     }
 
     // ==================== add_line tests ====================
@@ -227,7 +227,7 @@ mod tests {
 
         // Delete last vertex - should remove line (v1, v2) but keep (v0, v1)
         mesh.delete_vert(v2);
-        assert_eq!(mesh.verticies().len(), 2);
+        assert_eq!(mesh.verts().len(), 2);
         assert_eq!(mesh.lines().len(), 1);
         let line = mesh.lines().get(0).copied().unwrap();
         assert_eq!(line, (0, 1));
@@ -247,7 +247,7 @@ mod tests {
         // So v1 stays at index 1, v2 moves from index 2 to index 0
         mesh.delete_vert(0);
 
-        assert_eq!(mesh.verticies().len(), 2);
+        assert_eq!(mesh.verts().len(), 2);
         assert_eq!(mesh.lines().len(), 1);
         let line = mesh.lines().get(0).copied().unwrap();
         // After swap_remove: v1 stays at 1, v2 (was 2) -> 0
@@ -264,11 +264,11 @@ mod tests {
 
         // Delete v1 (index 1, also the last) - line referencing it is removed
         mesh.delete_vert(v1);
-        assert_eq!(mesh.verticies().len(), 1);
+        assert_eq!(mesh.verts().len(), 1);
         assert_eq!(mesh.lines().len(), 0);
 
         mesh.delete_vert(0); // v0 is at index 0
-        assert_eq!(mesh.verticies().len(), 0);
+        assert_eq!(mesh.verts().len(), 0);
         assert_eq!(mesh.lines().len(), 0);
     }
 
@@ -276,10 +276,10 @@ mod tests {
     fn test_roundtrip_add_delete_vertex() {
         let mut mesh = empty_mesh();
         let idx = mesh.add_vert(coord(1.0, 2.0, 3.0));
-        assert_eq!(mesh.verticies().len(), 1);
+        assert_eq!(mesh.verts().len(), 1);
 
         mesh.delete_vert(idx);
-        assert_eq!(mesh.verticies().len(), 0);
+        assert_eq!(mesh.verts().len(), 0);
     }
 
     #[test]

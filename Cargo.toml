@@ -3,10 +3,15 @@ name = "mesh_editor"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name="editor"
+path="src/editor/main.rs"
+
 [lib]
 path = "src/lib/mod.rs"
 
 [dependencies]
+macroquad = "0.4"
 
 [lints.rust]
 dead_code = "allow"
