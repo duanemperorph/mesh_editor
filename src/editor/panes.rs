@@ -101,7 +101,7 @@ impl Panes {
             border.start.y,
             border.end.x,
             border.end.y,
-            2.0,
+            1.0,
             GRAY,
         );
     }

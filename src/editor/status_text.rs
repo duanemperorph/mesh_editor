@@ -13,11 +13,11 @@ pub fn draw_status_text(editor_state: &EditorState, mesh: &MeshData) {
     // input preview mode
     // mirroring mode
     const TEXT_HEIGHT: f32 = 16.0;
-    const Y_PADDING: f32 = 1.0;
+    const Y_PADDING: f32 = 6.0;
     const X_PADDING: f32 = 20.0;
     let x_offset_0 = X_PADDING;
     let x_offset_1 = screen_width() / 2.0;
-    let y_offset = screen_height() - TEXT_HEIGHT - Y_PADDING;
+    let y_offset = screen_height() - Y_PADDING;
 
     if let Some(_) = editor_state.insert_preview().vert() {
         let insert_preview_desc = format_insert(editor_state.insert_preview());
