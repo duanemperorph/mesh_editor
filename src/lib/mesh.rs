@@ -11,8 +11,7 @@ pub type LineIndex = usize;
 pub type PolyIndex = usize;
 
 pub type Line = (VertIndex, VertIndex);
-
-pub type Poly = Vec<LineIndex>;
+pub type Poly = Vec<VertIndex>;
 
 pub enum MirrorMode {
     None,
@@ -77,6 +76,7 @@ impl Mesh {
         if index != last_vert_index {
             self.remap_swaped_vertex_indicies(last_vert_index, index);
         }
+        self.cleanup_polys_after_point_removal(index, last_vert_index);
         return Some(removed_value);
     }
 
@@ -96,7 +96,6 @@ impl Mesh {
         if index >= self.lines.len() {
             return None;
         }
-        self.cleanup_polys_after_line_removal(index, self.lines.len() - 1);
         return Some(self.lines.swap_remove(index));
     }
 
@@ -118,6 +117,10 @@ impl Mesh {
             })
             .collect();
     }
+
+    // pub fn polys_to_triangle_verts(&self) -> Vec<(Vec3, Vec3, Vec3)> {
+
+    // }
 
     fn remove_lines_containing_vert(&mut self, vert_index: VertIndex) {
         let line_indicies_to_remove: Vec<LineIndex> = self
@@ -158,7 +161,7 @@ impl Mesh {
             return None;
         }
         poly.iter()
-            .all(|&line_index| self.lines.get(line_index).is_some())
+            .all(|&vert_index| self.verticies.get(vert_index).is_some())
             .then_some(())
     }
 
@@ -167,20 +170,20 @@ impl Mesh {
         !poly.iter().all(|i| seen.insert(i))
     }
 
-    fn cleanup_polys_after_line_removal(
+    fn cleanup_polys_after_point_removal(
         &mut self,
-        removed_line_index: LineIndex,
-        replaced_line_index: LineIndex,
+        removed_vert_index: VertIndex,
+        replaced_vert_index: VertIndex,
     ) {
         let poly_iter = self.polys.iter_mut();
 
         for poly in poly_iter {
-            poly.retain(|&line_index| line_index != removed_line_index);
+            poly.retain(|&vert_index| vert_index != removed_vert_index);
 
-            for line_index in poly.iter_mut() {
+            for vert_index in poly.iter_mut() {
                 // acount for remapping caused by swap_remove
-                if *line_index == replaced_line_index {
-                    *line_index = removed_line_index;
+                if *vert_index == replaced_vert_index {
+                    *vert_index = removed_vert_index;
                 }
             }
         }
@@ -214,12 +217,12 @@ impl Mesh {
         // 8 vertices of a box centered at origin (0.5 tall, 2.0 long in z)
         mesh.add_vert(Vec3::new(-1.0, -0.25, -1.0)); // 0: front bottom left
         mesh.add_vert(Vec3::new(1.0, -0.25, -1.0)); // 1: front bottom right
-        mesh.add_vert(Vec3::new(1.0, 0.25, -1.0)); // 2: front top right
-        mesh.add_vert(Vec3::new(-1.0, 0.25, -1.0)); // 3: front top left
+        mesh.add_vert(Vec3::new(0.8, 0.25, -0.8)); // 2: front top right
+        mesh.add_vert(Vec3::new(-0.8, 0.25, -0.8)); // 3: front top left
         mesh.add_vert(Vec3::new(-1.0, -0.25, 1.0)); // 4: back bottom left
         mesh.add_vert(Vec3::new(1.0, -0.25, 1.0)); // 5: back bottom right
-        mesh.add_vert(Vec3::new(1.0, 0.25, 1.0)); // 6: back top right
-        mesh.add_vert(Vec3::new(-1.0, 0.25, 1.0)); // 7: back top left
+        mesh.add_vert(Vec3::new(0.8, 0.25, 0.8)); // 6: back top right
+        mesh.add_vert(Vec3::new(-0.8, 0.25, 0.8)); // 7: back top left
 
         // 12 edges of the cube
         mesh.add_line((0, 1)); // 0: front bottom
@@ -235,13 +238,13 @@ impl Mesh {
         mesh.add_line((2, 6)); // 10: top right
         mesh.add_line((3, 7)); // 11: top left
 
-        // 6 faces of the cube
+        // 6 faces of the cube (vertex indices in winding order)
         mesh.add_poly(vec![0, 1, 2, 3]); // front
-        mesh.add_poly(vec![4, 5, 6, 7]); // back
-        mesh.add_poly(vec![0, 9, 4, 8]); // bottom
-        mesh.add_poly(vec![2, 10, 6, 11]); // top
-        mesh.add_poly(vec![3, 8, 7, 11]); // left
-        mesh.add_poly(vec![1, 9, 5, 10]); // right
+        mesh.add_poly(vec![5, 4, 7, 6]); // back
+        mesh.add_poly(vec![0, 4, 5, 1]); // bottom
+        mesh.add_poly(vec![3, 2, 6, 7]); // top
+        mesh.add_poly(vec![0, 3, 7, 4]); // left
+        mesh.add_poly(vec![1, 5, 6, 2]); // right
 
         mesh
     }
