@@ -25,7 +25,7 @@ pub enum InputMode {
     SelectVerts,
     SelectLines,
     SelectPolys,
-    InsertVert,
+    InsertVerts,
 }
 
 #[derive(PartialEq)]
@@ -265,8 +265,8 @@ impl EditorState {
         &self.input_mode
     }
 
-    pub fn input_mode_mut(&mut self) -> &mut InputMode {
-        &mut self.input_mode
+    pub fn set_input_mode(&mut self, mode: InputMode) {
+        self.input_mode = mode;
     }
 
     pub fn panel_state_xz(&self) -> &PanelState2D {
@@ -313,7 +313,10 @@ impl EditorState {
         &self.viewer_mode
     }
 
-    pub fn viewer_mode_mut(&mut self) -> &mut ViewerMode {
-        &mut self.viewer_mode
+    pub fn toggle_viewer_mode(&mut self) {
+        match self.viewer_mode {
+            ViewerMode::EditorPanels => self.viewer_mode = ViewerMode::FreeCam,
+            ViewerMode::FreeCam => self.viewer_mode = ViewerMode::EditorPanels,
+        }
     }
 }

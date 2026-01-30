@@ -17,12 +17,17 @@ use panes::*;
 mod render_pane;
 use render_pane::*;
 
+mod keyboard;
+use keyboard::*;
+
 #[macroquad::main("Mesh Editor")]
 async fn main() {
     let mut current_mesh = MeshData::new_cube();
     let mut editor_state = EditorState::new();
 
     loop {
+        handle_key_presses(&mut editor_state);
+
         let panes = Panes::calc_from_screen_dims();
 
         clear_background(BLACK);
