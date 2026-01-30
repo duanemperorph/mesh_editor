@@ -6,6 +6,8 @@ use macroquad::prelude::*;
 
 const STATUS_BAR_HEIGHT: f32 = 20.0;
 
+pub type Viewport = (i32, i32, i32, i32);
+
 pub struct Panes {
     left: Rect,
     top_right: Rect,
@@ -117,7 +119,7 @@ impl Panes {
         self.left
     }
 
-    pub fn left_viewport(&self) -> (i32, i32, i32, i32) {
+    pub fn left_viewport(&self) -> Viewport {
         rect_to_viewport(self.left)
     }
 
@@ -125,7 +127,7 @@ impl Panes {
         self.top_right
     }
 
-    pub fn top_right_viewport(&self) -> (i32, i32, i32, i32) {
+    pub fn top_right_viewport(&self) -> Viewport {
         rect_to_viewport(self.top_right)
     }
 
@@ -133,7 +135,7 @@ impl Panes {
         self.bottom_right
     }
 
-    pub fn bottom_right_viewport(&self) -> (i32, i32, i32, i32) {
+    pub fn bottom_right_viewport(&self) -> Viewport {
         rect_to_viewport(self.bottom_right)
     }
 
@@ -141,11 +143,11 @@ impl Panes {
         self.bottom_bar
     }
 
-    pub fn bottom_bar_viewport(&self) -> (i32, i32, i32, i32) {
+    pub fn bottom_bar_viewport(&self) -> Viewport {
         rect_to_viewport(self.bottom_bar)
     }
 }
 
-fn rect_to_viewport(rect: Rect) -> (i32, i32, i32, i32) {
+fn rect_to_viewport(rect: Rect) -> Viewport {
     (rect.x as i32, rect.y as i32, rect.w as i32, rect.h as i32)
 }

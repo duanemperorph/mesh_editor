@@ -3,14 +3,19 @@
 //
 
 use macroquad::prelude::*;
-use mesh_editor::editor_state::*;
 use mesh_editor::mesh::{Mesh as MeshData, *};
+
+mod editor_state;
+use editor_state::*;
 
 mod status_text;
 use status_text::*;
 
 mod panes;
 use panes::*;
+
+mod render_pane;
+use render_pane::*;
 
 #[macroquad::main("Mesh Editor")]
 async fn main() {

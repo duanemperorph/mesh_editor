@@ -2,8 +2,8 @@
 // status_text.rs -> draws the status text at the bottom
 //
 
+use crate::editor_state::*;
 use macroquad::prelude::*;
-use mesh_editor::editor_state::*;
 use mesh_editor::mesh::{Mesh as MeshData, *};
 
 pub fn draw_status_text(editor_state: &EditorState, mesh: &MeshData) {
