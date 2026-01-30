@@ -2,19 +2,13 @@
 // mesh -> custom mesh format
 //
 
+use glam::Vec3;
 use std::collections::HashSet;
 use std::fmt;
 
 pub type VertIndex = usize;
 pub type LineIndex = usize;
 pub type PolyIndex = usize;
-
-#[derive(Copy, Clone)]
-pub struct Coord3D {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
-}
 
 pub type Line = (VertIndex, VertIndex);
 
@@ -28,15 +22,9 @@ pub enum MirrorMode {
 
 pub struct Mesh {
     mirror_mode: MirrorMode,
-    verticies: Vec<Coord3D>,
+    verticies: Vec<Vec3>,
     lines: Vec<Line>,
     polys: Vec<Poly>,
-}
-
-impl Coord3D {
-    pub fn new(x: f32, y: f32, z: f32) -> Coord3D {
-        return Coord3D { x, y, z };
-    }
 }
 
 impl Mesh {
@@ -49,7 +37,7 @@ impl Mesh {
         };
     }
 
-    pub fn verts(&self) -> &Vec<Coord3D> {
+    pub fn verts(&self) -> &Vec<Vec3> {
         &self.verticies
     }
 
@@ -69,17 +57,17 @@ impl Mesh {
         self.mirror_mode = mode;
     }
 
-    pub fn add_vert(&mut self, coord: Coord3D) -> VertIndex {
+    pub fn add_vert(&mut self, coord: Vec3) -> VertIndex {
         self.verticies.push(coord);
         return self.verticies.len() - 1;
     }
 
-    pub fn update_vert(&mut self, index: VertIndex, coord: Coord3D) -> Option<()> {
+    pub fn update_vert(&mut self, index: VertIndex, coord: Vec3) -> Option<()> {
         *self.verticies.get_mut(index as usize)? = coord;
         return Some(());
     }
 
-    pub fn delete_vert(&mut self, index: VertIndex) -> Option<Coord3D> {
+    pub fn delete_vert(&mut self, index: VertIndex) -> Option<Vec3> {
         if index >= self.verticies.len() {
             return None;
         }
@@ -193,12 +181,6 @@ impl Mesh {
 // Formatting
 //
 
-impl fmt::Display for Coord3D {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "(x: {}, y: {}, z: {})", self.x, self.y, self.z)
-    }
-}
-
 impl fmt::Display for MirrorMode {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -218,14 +200,14 @@ impl Mesh {
         let mut mesh = Mesh::new();
 
         // 8 vertices of a box centered at origin (0.5 tall, 2.0 long in z)
-        mesh.add_vert(Coord3D::new(-1.0, -0.25, -1.0)); // 0: front bottom left
-        mesh.add_vert(Coord3D::new(1.0, -0.25, -1.0)); // 1: front bottom right
-        mesh.add_vert(Coord3D::new(1.0, 0.25, -1.0)); // 2: front top right
-        mesh.add_vert(Coord3D::new(-1.0, 0.25, -1.0)); // 3: front top left
-        mesh.add_vert(Coord3D::new(-1.0, -0.25, 1.0)); // 4: back bottom left
-        mesh.add_vert(Coord3D::new(1.0, -0.25, 1.0)); // 5: back bottom right
-        mesh.add_vert(Coord3D::new(1.0, 0.25, 1.0)); // 6: back top right
-        mesh.add_vert(Coord3D::new(-1.0, 0.25, 1.0)); // 7: back top left
+        mesh.add_vert(Vec3::new(-1.0, -0.25, -1.0)); // 0: front bottom left
+        mesh.add_vert(Vec3::new(1.0, -0.25, -1.0)); // 1: front bottom right
+        mesh.add_vert(Vec3::new(1.0, 0.25, -1.0)); // 2: front top right
+        mesh.add_vert(Vec3::new(-1.0, 0.25, -1.0)); // 3: front top left
+        mesh.add_vert(Vec3::new(-1.0, -0.25, 1.0)); // 4: back bottom left
+        mesh.add_vert(Vec3::new(1.0, -0.25, 1.0)); // 5: back bottom right
+        mesh.add_vert(Vec3::new(1.0, 0.25, 1.0)); // 6: back top right
+        mesh.add_vert(Vec3::new(-1.0, 0.25, 1.0)); // 7: back top left
 
         // 12 edges of the cube
         mesh.add_line((0, 1)); // 0: front bottom

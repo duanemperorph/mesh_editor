@@ -12,6 +12,7 @@ path = "src/lib/mod.rs"
 
 [dependencies]
 macroquad = "0.4"
+glam = "0.29"
 
 [lints.rust]
 dead_code = "allow"

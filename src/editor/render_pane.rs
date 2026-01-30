@@ -5,9 +5,9 @@
 use crate::editor_state::*;
 use crate::panes::Viewport;
 use macroquad::prelude::*;
-use mesh_editor::mesh::{Mesh as MeshData, *};
+use mesh_editor::mesh::Mesh as MeshData;
 
-fn render_editor_panel_viewport(
+pub fn render_editor_pane_viewport(
     panel_state: &impl PanelCameraVectors,
     mesh: MeshData,
     viewport: Viewport,

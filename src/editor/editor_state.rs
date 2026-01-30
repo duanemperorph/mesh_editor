@@ -3,7 +3,7 @@
 //
 
 use macroquad::prelude::*;
-use mesh_editor::mesh::{Coord3D, Line, LineIndex, Poly, PolyIndex, VertIndex};
+use mesh_editor::mesh::{Line, LineIndex, Poly, PolyIndex, VertIndex};
 
 pub trait PanelCameraVectors {
     fn to_target_vec(&self) -> Vec3;
@@ -31,7 +31,7 @@ pub enum ViewerMode {
 }
 
 pub struct InsertPreview {
-    vert: Option<Coord3D>,
+    vert: Option<Vec3>,
     line: Option<Line>,
     poly: Option<Poly>,
 }
@@ -132,7 +132,7 @@ impl InsertPreview {
         }
     }
 
-    pub fn vert(&self) -> Option<&Coord3D> {
+    pub fn vert(&self) -> Option<&Vec3> {
         self.vert.as_ref()
     }
 
@@ -144,7 +144,7 @@ impl InsertPreview {
         self.poly.as_ref()
     }
 
-    pub fn set_vert(&mut self, vert: Coord3D) {
+    pub fn set_vert(&mut self, vert: Vec3) {
         self.vert = Some(vert);
     }
 

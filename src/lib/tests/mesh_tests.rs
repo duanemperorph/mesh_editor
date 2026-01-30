@@ -22,7 +22,8 @@
 //     lines: Vec<Line>,
 // }
 
-use crate::mesh::{Coord3D, Line, Mesh, Poly};
+use crate::mesh::{Line, Mesh, Poly};
+use glam::Vec3;
 
 #[cfg(test)]
 mod tests {
@@ -34,8 +35,8 @@ mod tests {
     }
 
     // Helper to create a coordinate
-    fn coord(x: f32, y: f32, z: f32) -> Coord3D {
-        Coord3D::new(x, y, z)
+    fn coord(x: f32, y: f32, z: f32) -> Vec3 {
+        Vec3::new(x, y, z)
     }
 
     // ==================== add_vert tests ====================
