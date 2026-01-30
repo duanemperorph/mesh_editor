@@ -17,7 +17,7 @@ pub type Poly = Vec<LineIndex>;
 pub enum MirrorMode {
     None,
     Bilateral,
-    Radial(u32),
+    Quadralateral,
 }
 
 pub struct Mesh {
@@ -107,6 +107,18 @@ impl Mesh {
         return Some(self.polys.swap_remove(index));
     }
 
+    pub fn lines_to_vert_pairs(&self) -> Vec<(Vec3, Vec3)> {
+        return self
+            .lines
+            .iter()
+            .map(|line| {
+                let v1 = *self.verticies.get(line.0).unwrap_or(&Vec3::ZERO);
+                let v2 = *self.verticies.get(line.1).unwrap_or(&Vec3::ZERO);
+                (v1, v2)
+            })
+            .collect();
+    }
+
     fn remove_lines_containing_vert(&mut self, vert_index: VertIndex) {
         let line_indicies_to_remove: Vec<LineIndex> = self
             .lines
@@ -186,7 +198,7 @@ impl fmt::Display for MirrorMode {
         match self {
             Self::None => write!(formatter, "None"),
             Self::Bilateral => write!(formatter, "Bilateral"),
-            Self::Radial(count) => write!(formatter, "Radial ({})", count),
+            Self::Quadralateral => write!(formatter, "Quadralateral"),
         }
     }
 }
