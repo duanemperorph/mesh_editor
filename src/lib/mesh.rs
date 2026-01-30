@@ -2,7 +2,7 @@
 // mesh -> custom mesh format
 //
 
-use glam::Vec3;
+use macroquad::prelude::Vec3;
 use std::collections::HashSet;
 use std::fmt;
 
@@ -12,6 +12,7 @@ pub type PolyIndex = usize;
 
 pub type Line = (VertIndex, VertIndex);
 pub type Poly = Vec<VertIndex>;
+pub type TriangleVerts = (Vec3, Vec3, Vec3);
 
 pub enum MirrorMode {
     None,
@@ -117,10 +118,6 @@ impl Mesh {
             })
             .collect();
     }
-
-    // pub fn polys_to_triangle_verts(&self) -> Vec<(Vec3, Vec3, Vec3)> {
-
-    // }
 
     fn remove_lines_containing_vert(&mut self, vert_index: VertIndex) {
         let line_indicies_to_remove: Vec<LineIndex> = self
