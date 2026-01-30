@@ -17,7 +17,7 @@ pub type TriangleVerts = (Vec3, Vec3, Vec3);
 pub enum MirrorMode {
     None,
     Bilateral,
-    Quadralateral,
+    Radial(u8),
 }
 
 pub struct Mesh {
@@ -30,7 +30,7 @@ pub struct Mesh {
 impl Mesh {
     pub fn new() -> Mesh {
         return Mesh {
-            mirror_mode: MirrorMode::Bilateral,
+            mirror_mode: MirrorMode::None,
             verticies: Vec::new(),
             lines: Vec::new(),
             polys: Vec::new(),
@@ -119,6 +119,35 @@ impl Mesh {
             .collect();
     }
 
+    pub fn polys_to_triangle_indicies(&self) -> Vec<VertIndex> {
+        self.polys
+            .iter()
+            .map(|poly| Self::poly_indicies_to_triangle_indicies(poly))
+            .flatten()
+            .collect()
+    }
+
+    //
+    // uses triangle fan to get indicies for each triangle
+    //
+    fn poly_indicies_to_triangle_indicies(poly: &Poly) -> Vec<VertIndex> {
+        if poly.len() < 3 {
+            return vec![];
+        }
+
+        let v0 = poly[0];
+
+        poly.windows(2)
+            .skip(1)
+            .map(|slice| {
+                let v1 = slice[0];
+                let v2 = slice[1];
+                [v0, v1, v2]
+            })
+            .flatten()
+            .collect()
+    }
+
     fn remove_lines_containing_vert(&mut self, vert_index: VertIndex) {
         let line_indicies_to_remove: Vec<LineIndex> = self
             .lines
@@ -198,7 +227,7 @@ impl fmt::Display for MirrorMode {
         match self {
             Self::None => write!(formatter, "None"),
             Self::Bilateral => write!(formatter, "Bilateral"),
-            Self::Quadralateral => write!(formatter, "Quadralateral"),
+            Self::Radial(axes) => write!(formatter, "Radial({})", axes),
         }
     }
 }

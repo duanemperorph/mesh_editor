@@ -27,7 +27,35 @@ async fn main() {
 
         clear_background(BLACK);
 
-        panes.draw_borders();
+        if *editor_state.viewer_mode() == ViewerMode::EditorPanels {
+            render_editor_pane_viewport(
+                editor_state.panel_state_xz(),
+                &current_mesh,
+                panes.left_viewport(),
+            );
+            render_editor_pane_viewport(
+                editor_state.panel_state_yz(),
+                &current_mesh,
+                panes.top_right_viewport(),
+            );
+            render_editor_pane_viewport(
+                editor_state.panel_state_xy(),
+                &current_mesh,
+                panes.bottom_right_viewport(),
+            );
+        } else {
+            render_editor_pane_viewport(
+                editor_state.panel_state_rotate_cam(),
+                &current_mesh,
+                panes.full_content_viewport(),
+            );
+        }
+
+        if *editor_state.viewer_mode() == ViewerMode::EditorPanels {
+            panes.draw_all_borders();
+        } else {
+            panes.draw_bottom_border();
+        }
         draw_status_text(&editor_state, &current_mesh);
 
         next_frame().await

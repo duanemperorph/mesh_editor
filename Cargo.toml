@@ -12,6 +12,7 @@ path = "src/lib/mod.rs"
 
 [dependencies]
 macroquad = "0.4"
+strum = { version = "0.26", features = ["derive"] }
 
 [lints.rust]
 dead_code = "allow"

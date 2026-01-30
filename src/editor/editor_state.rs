@@ -4,6 +4,7 @@
 
 use macroquad::prelude::*;
 use mesh_editor::mesh::{Line, LineIndex, Poly, PolyIndex, VertIndex};
+use strum::Display;
 
 pub trait PanelCameraVectors {
     fn to_target_vec(&self) -> Vec3;
@@ -19,12 +20,15 @@ pub enum Selection {
     Polys(Vec<PolyIndex>),
 }
 
+#[derive(Display)]
 pub enum InputMode {
-    SingleSelect,
-    MultiSelect,
+    SelectVerts,
+    SelectLines,
+    SelectPolys,
     InsertVert,
 }
 
+#[derive(PartialEq)]
 pub enum ViewerMode {
     EditorPanels,
     FreeCam,
@@ -89,7 +93,7 @@ impl PanelCameraVectors for PanelState2D {
     fn to_up_vec(&self) -> Vec3 {
         match self.viewing_plane {
             PanelViewingPlane::XY => vec3(0.0, 1.0, 0.0),
-            PanelViewingPlane::XZ => vec3(0.0, 1.0, 0.0),
+            PanelViewingPlane::XZ => vec3(0.0, 0.0, 1.0),
             PanelViewingPlane::YZ => vec3(0.0, 1.0, 0.0),
         }
     }
@@ -176,12 +180,12 @@ impl InsertPreview {
 }
 
 impl PanelState2D {
-    pub fn new() -> PanelState2D {
+    pub fn new(viewing_plane: PanelViewingPlane) -> PanelState2D {
         PanelState2D {
             is_flipped: false,
             pan: vec2(0.0, 0.0),
-            distance: 10.0,
-            viewing_plane: PanelViewingPlane::XZ,
+            distance: 5.0,
+            viewing_plane,
         }
     }
 
@@ -239,12 +243,12 @@ impl EditorState {
     pub fn new() -> EditorState {
         EditorState {
             selection: Selection::None,
-            input_mode: InputMode::SingleSelect,
-            panel_state_xz: PanelState2D::new(),
-            panel_state_yz: PanelState2D::new(),
-            panel_state_xy: PanelState2D::new(),
-            viewer_mode: ViewerMode::EditorPanels,
+            input_mode: InputMode::SelectVerts,
+            panel_state_xz: PanelState2D::new(PanelViewingPlane::XZ),
+            panel_state_yz: PanelState2D::new(PanelViewingPlane::YZ),
+            panel_state_xy: PanelState2D::new(PanelViewingPlane::XY),
             panel_state_rotate_cam: PanelStateFreeCam::new(),
+            viewer_mode: ViewerMode::EditorPanels,
             insert_preview: InsertPreview::new(),
         }
     }
@@ -289,11 +293,27 @@ impl EditorState {
         &mut self.panel_state_rotate_cam
     }
 
+    pub fn panel_state_xy(&self) -> &PanelState2D {
+        &self.panel_state_xy
+    }
+
+    pub fn panel_state_xy_mut(&mut self) -> &mut PanelState2D {
+        &mut self.panel_state_xy
+    }
+
     pub fn insert_preview(&self) -> &InsertPreview {
         &self.insert_preview
     }
 
     pub fn insert_preview_mut(&mut self) -> &mut InsertPreview {
         &mut self.insert_preview
+    }
+
+    pub fn viewer_mode(&self) -> &ViewerMode {
+        &self.viewer_mode
+    }
+
+    pub fn viewer_mode_mut(&mut self) -> &mut ViewerMode {
+        &mut self.viewer_mode
     }
 }

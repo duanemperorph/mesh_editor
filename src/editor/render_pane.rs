@@ -9,7 +9,7 @@ use mesh_editor::mesh::Mesh as MeshData;
 
 pub fn render_editor_pane_viewport(
     panel_state: &impl PanelCameraVectors,
-    mesh: MeshData,
+    mesh: &MeshData,
     viewport: Viewport,
 ) {
     let camera = Camera3D {
@@ -25,6 +25,9 @@ pub fn render_editor_pane_viewport(
         z_far: 10000.0,
     };
     set_camera(&camera);
+    render_mesh(mesh);
+    render_lines(mesh);
+    render_points(mesh);
 }
 
 fn render_points(mesh: &MeshData) {
@@ -44,14 +47,42 @@ fn render_lines(mesh: &MeshData) {
     }
 }
 
-// fn render_polys(mesh: &MeshData) {
-//     let poly_color = GRAY;
+//
+// Render mesh in one go zoom zoom
+//
+fn render_mesh(mesh: &MeshData) {
+    let color = GRAY;
+    let mesh = mesh_data_to_macro_mesh(mesh, GRAY);
+    draw_mesh(&mesh);
+}
 
-//     for (v1, v2, v3) in mesh.polys_to_triangle_verts() {
-//         draw_triangle3d(v1, v2, v3, poly_color);
-//     }
-// }
+fn mesh_data_to_macro_mesh(mesh_data: &MeshData, color: Color) -> MacroMesh {
+    let vertices = mesh_data
+        .verts()
+        .iter()
+        .map(|v| Vertex {
+            position: *v,
+            uv: Vec2::ZERO,
+            color: color.into(),
+            normal: Vec4::ZERO,
+        })
+        .collect();
 
-// fn mesh_data_to_macro_mesh(mesh_data: &MeshData) -> MacroMesh {
-//     // convert custom editor mesh to macro mesh
-// }
+    let indices = mesh_data
+        .polys_to_triangle_indicies()
+        .iter()
+        .map(|index| *index as u16)
+        .collect();
+
+    pub struct Mesh {
+        pub vertices: Vec<Vertex>,
+        pub indices: Vec<u16>,
+        pub texture: Option<Texture2D>,
+    }
+
+    MacroMesh {
+        vertices,
+        indices,
+        texture: None,
+    }
+}
