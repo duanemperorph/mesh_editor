@@ -17,27 +17,30 @@ type SelectedPanelInfo<'a> = (SelectedPanel<'a>, Rect);
 
 pub fn handle_mouse_input<'a>(editor_state: &'a mut EditorState, panes: &Panes) {
     let current_mouse_coords = mouse_position().into();
-    // println!("mouse at: {}", current_mouse_coords);
-    let Some((mut panel, viewport)) =
+
+    let Some((panel, viewport)) =
         get_panel_under_coords_mut(current_mouse_coords, editor_state, panes)
     else {
         return;
     };
 
-    // handle mouse events and stuff
-    if is_mouse_button_down(MouseButton::Right) {
-        handle_mouse_pan(&mut panel, viewport);
+    if let SelectedPanel::Panel2DView(panel) = panel {
+        if is_mouse_button_down(MouseButton::Right) {
+            handle_mouse_pan(panel, viewport);
+        } else if is_mouse_button_pressed(MouseButton::Middle) {
+            handle_reset_pan(panel);
+        }
     }
 }
 
-fn handle_mouse_pan(panel: &mut SelectedPanel, viewport: Rect) {
-    let SelectedPanel::Panel2DView(panel) = panel else {
-        return;
-    };
+fn handle_mouse_pan(panel: &mut PanelState2D, viewport: Rect) {
     let mouse_delta = mouse_delta_position();
     let pan_delta = screen_fraction_to_world_scale_vec2(mouse_delta, panel, viewport);
     *panel.pan_mut() += pan_delta;
-    let new_pan = panel.pan();
+}
+
+fn handle_reset_pan(panel: &mut PanelState2D) {
+    *panel.pan_mut() = vec2(0.0, 0.0);
 }
 
 fn get_panel_under_coords_mut<'a>(
@@ -49,8 +52,6 @@ fn get_panel_under_coords_mut<'a>(
     let Some(pane) = panes.get_pane_under_coords(coords, is_in_full_content_mode) else {
         return None;
     };
-
-    // println!("Got pane: {}", pane.pane_id);
 
     let panel = match pane.pane_id {
         PaneId::FullContent => {
