@@ -23,8 +23,6 @@ pub fn render_editor_pane_viewport(
     let aspect = (viewport.2 as f32) / (viewport.3 as f32);
     let fovy = panel_state.distance() * 2.0;
 
-    // let fovy = if aspect < 1.0 { aspect * fovy } else { fovy };
-
     let camera = Camera3D {
         position: panel_state.to_camera_pos_vec(),
         target: panel_state.to_target_vec(),
@@ -38,9 +36,16 @@ pub fn render_editor_pane_viewport(
         z_far: 10000.0,
     };
     set_camera(&camera);
+
+    // apply panel model rotation matrix if needed;
+    let rotation = panel_state.to_model_rotation();
+    let rotation_matrix = Mat4::from_euler(EulerRot::XYZ, rotation.x, rotation.y, rotation.z);
+
+    push_model_matrix(rotation_matrix);
     render_mesh(mesh);
     render_lines(mesh);
     render_points(mesh);
+    pop_model_matrix()
 }
 
 fn render_points(mesh: &MeshData) {
@@ -160,5 +165,17 @@ impl PanelCameraVectors for PanelStateFreeCam {
 
     fn distance(&self) -> f32 {
         PanelStateFreeCam::distance(self)
+    }
+}
+
+fn push_model_matrix(matrix: Mat4) {
+    unsafe {
+        get_internal_gl().quad_gl.push_model_matrix(matrix);
+    }
+}
+
+fn pop_model_matrix() {
+    unsafe {
+        get_internal_gl().quad_gl.pop_model_matrix();
     }
 }
