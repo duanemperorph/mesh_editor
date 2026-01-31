@@ -43,24 +43,24 @@ impl PanelState2D {
         self.is_flipped
     }
 
+    pub fn is_flipped_mut(&mut self) -> &mut bool {
+        &mut self.is_flipped
+    }
+
     pub fn pan(&self) -> Vec2 {
         self.pan
+    }
+
+    pub fn pan_mut(&mut self) -> &mut Vec2 {
+        &mut self.pan
     }
 
     pub fn distance(&self) -> f32 {
         self.distance
     }
 
-    pub fn set_flipped(&mut self, flipped: bool) {
-        self.is_flipped = flipped;
-    }
-
-    pub fn set_pan(&mut self, pan: Vec2) {
-        self.pan = pan;
-    }
-
-    pub fn set_distance(&mut self, distance: f32) {
-        self.distance = distance;
+    pub fn distance_mut(&mut self) -> &mut f32 {
+        &mut self.distance
     }
 }
 
@@ -76,15 +76,15 @@ impl PanelStateFreeCam {
         self.rotation
     }
 
+    pub fn rotation_mut(&mut self) -> &mut Vec2 {
+        &mut self.rotation
+    }
+
     pub fn distance(&self) -> f32 {
         self.distance
     }
 
-    pub fn set_rotation(&mut self, rotation: Vec2) {
-        self.rotation = rotation;
-    }
-
-    pub fn set_distance(&mut self, distance: f32) {
-        self.distance = distance;
+    pub fn distance_mut(&mut self) -> &mut f32 {
+        &mut self.distance
     }
 }

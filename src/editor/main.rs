@@ -29,6 +29,9 @@ use keyboard::*;
 mod mouse;
 use mouse::*;
 
+mod screen_to_world;
+use screen_to_world::*;
+
 #[macroquad::main("Mesh Editor")]
 async fn main() {
     let mut current_mesh = MeshData::new_cube();

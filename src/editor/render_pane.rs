@@ -102,18 +102,18 @@ fn mesh_data_to_macro_mesh(mesh_data: &MeshData, color: Color) -> MacroMesh {
 impl PanelCameraVectors for PanelState2D {
     fn to_target_vec(&self) -> Vec3 {
         match self.viewing_plane() {
-            PanelViewingPlane::XY => vec3(self.pan().x, self.pan().y, 0.0),
+            PanelViewingPlane::XY => vec3(-self.pan().x, self.pan().y, 0.0),
             PanelViewingPlane::XZ => vec3(self.pan().x, 0.0, self.pan().y),
-            PanelViewingPlane::YZ => vec3(0.0, self.pan().x, self.pan().y),
+            PanelViewingPlane::YZ => vec3(0.0, self.pan().y, self.pan().x),
         }
     }
 
     fn to_camera_pos_vec(&self) -> Vec3 {
         let offset = self.distance() * if self.is_flipped() { -1.0 } else { 1.0 };
         match self.viewing_plane() {
-            PanelViewingPlane::XY => vec3(self.pan().x, self.pan().y, offset),
+            PanelViewingPlane::XY => vec3(-self.pan().x, self.pan().y, offset),
             PanelViewingPlane::XZ => vec3(self.pan().x, offset, self.pan().y),
-            PanelViewingPlane::YZ => vec3(offset, self.pan().x, self.pan().y),
+            PanelViewingPlane::YZ => vec3(offset, self.pan().y, self.pan().x),
         }
     }
 

@@ -1,19 +1,25 @@
 //
 // Panes.rs - editor pane calculation and border drawing
 //
-
 use macroquad::prelude::*;
+use strum::Display;
 
 const STATUS_BAR_HEIGHT: f32 = 20.0;
 
 pub type Viewport = (i32, i32, i32, i32);
 
+#[derive(Display)]
 pub enum PaneId {
     Left,
     TopRight,
     BottomRight,
     FullContent,
     BottomBar,
+}
+
+pub struct PaneInfo {
+    pub pane_id: PaneId,
+    pub viewport_rect: Rect,
 }
 
 pub struct Panes {
@@ -108,24 +114,24 @@ impl Panes {
         &self,
         coord: Vec2,
         is_in_full_content_mode: bool,
-    ) -> Option<PaneId> {
+    ) -> Option<PaneInfo> {
         if self.bottom_bar.contains(coord) {
-            return Some(PaneId::BottomBar);
+            Some(PaneInfo::new(PaneId::BottomBar, self.bottom_bar))
         } else if is_in_full_content_mode {
             if self.full_content.contains(coord) {
-                return Some(PaneId::FullContent);
+                Some(PaneInfo::new(PaneId::FullContent, self.full_content))
             } else {
-                return None;
+                None
             }
         } else {
             if self.left.contains(coord) {
-                return Some(PaneId::Left);
+                Some(PaneInfo::new(PaneId::Left, self.left))
             } else if self.top_right.contains(coord) {
-                return Some(PaneId::TopRight);
+                Some(PaneInfo::new(PaneId::TopRight, self.top_right))
             } else if self.bottom_right.contains(coord) {
-                return Some(PaneId::BottomRight);
+                Some(PaneInfo::new(PaneId::BottomRight, self.bottom_right))
             } else {
-                return None;
+                None
             }
         }
     }
@@ -210,6 +216,21 @@ impl Panes {
     }
 }
 
+impl PaneInfo {
+    fn new(pane_id: PaneId, viewport_rect: Rect) -> PaneInfo {
+        PaneInfo {
+            pane_id,
+            viewport_rect,
+        }
+    }
+}
+
 fn rect_to_viewport(rect: Rect) -> Viewport {
-    (rect.x as i32, rect.y as i32, rect.w as i32, rect.h as i32)
+    let flipped_y = screen_height() - rect.y - rect.h;
+    (
+        rect.x as i32,
+        flipped_y as i32,
+        rect.w as i32,
+        rect.h as i32,
+    )
 }

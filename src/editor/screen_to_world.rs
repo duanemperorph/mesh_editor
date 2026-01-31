@@ -1,21 +1,23 @@
 //
-// TODO: all this stuff for converting coords
+// screen_to_world -> screen to world coord transforms
+//
 //
 
-fn screen_to_world_ortho(screen_pos: Vec2, viewport: Rect, panel: &PanelState2D) -> Vec3 {
-    // Normalize to -1..1 within the viewport
-    let ndc_x = ((screen_pos.x - viewport.x) / viewport.w) * 2.0 - 1.0;
-    let ndc_y = 1.0 - ((screen_pos.y - viewport.y) / viewport.h) * 2.0; // flip y
-
-    // Scale by camera distance (ortho zoom)
+use crate::editor_panel_state::*;
+use macroquad::prelude::*;
+//
+// Scales a screen delta -> world delta. Use for mouse pan.
+//
+pub fn screen_fraction_to_world_scale_vec2(
+    screen_delta: Vec2,
+    panel: &PanelState2D,
+    viewport: Rect,
+) -> Vec2 {
+    let fovy = panel.distance() * 2.0;
     let aspect = viewport.w / viewport.h;
-    let world_x = ndc_x * panel.distance() * aspect + panel.pan().x;
-    let world_y = ndc_y * panel.distance() + panel.pan().y;
 
-    // Map to 3D based on viewing plane
-    match panel.viewing_plane() {
-        PanelViewingPlane::XY => vec3(world_x, world_y, 0.0),
-        PanelViewingPlane::XZ => vec3(world_x, 0.0, world_y),
-        PanelViewingPlane::YZ => vec3(0.0, world_x, world_y),
-    }
+    let world_dx = -screen_delta.x * fovy * aspect;
+    let world_dy = -screen_delta.y * fovy;
+
+    return vec2(world_dx, world_dy);
 }
