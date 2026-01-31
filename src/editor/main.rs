@@ -23,11 +23,11 @@ use panes::*;
 mod render_pane;
 use render_pane::*;
 
-mod keyboard;
-use keyboard::*;
+mod global_commands;
+use global_commands::*;
 
-mod mouse;
-use mouse::*;
+mod viewer_commands;
+use viewer_commands::*;
 
 #[macroquad::main("Mesh Editor")]
 async fn main() {
@@ -37,8 +37,8 @@ async fn main() {
     loop {
         let panes = Panes::calc_from_screen_dims();
 
-        handle_key_presses(&mut editor_state);
-        handle_mouse_input(&mut editor_state, &panes);
+        handle_global_keyboard_commands(&mut editor_state);
+        handle_viewer_commands(&mut editor_state, &panes);
 
         clear_background(BLACK);
 

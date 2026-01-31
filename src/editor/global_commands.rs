@@ -11,7 +11,7 @@ pub struct ModifierKeys {
     alt_key: bool,
 }
 
-pub fn handle_key_presses(editor_state: &mut EditorState) {
+pub fn handle_global_keyboard_commands(editor_state: &mut EditorState) {
     if is_key_pressed(KeyCode::Tab) {
         editor_state.toggle_viewer_mode();
     }

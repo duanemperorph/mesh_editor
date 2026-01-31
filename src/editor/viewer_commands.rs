@@ -15,7 +15,7 @@ enum SelectedPanel<'a> {
 
 type SelectedPanelInfo<'a> = (SelectedPanel<'a>, Rect);
 
-pub fn handle_mouse_input<'a>(editor_state: &'a mut EditorState, panes: &Panes) {
+pub fn handle_viewer_commands<'a>(editor_state: &'a mut EditorState, panes: &Panes) {
     let current_mouse_coords = mouse_position().into();
 
     let Some((panel, viewport)) =
