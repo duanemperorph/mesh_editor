@@ -7,6 +7,14 @@ use crate::panes::Viewport;
 use macroquad::prelude::{Mesh as MacroMesh, *};
 use mesh_editor::mesh::Mesh as MeshData;
 
+pub trait PanelCameraVectors {
+    fn to_target_vec(&self) -> Vec3;
+    fn to_camera_pos_vec(&self) -> Vec3;
+    fn to_up_vec(&self) -> Vec3;
+    fn to_model_rotation(&self) -> Vec3;
+    fn distance(&self) -> f32;
+}
+
 pub fn render_editor_pane_viewport(
     panel_state: &impl PanelCameraVectors,
     mesh: &MeshData,
@@ -16,11 +24,11 @@ pub fn render_editor_pane_viewport(
         position: panel_state.to_camera_pos_vec(),
         target: panel_state.to_target_vec(),
         up: panel_state.to_up_vec(),
-        fovy: 45.0,
+        fovy: panel_state.distance() * 2.0, // total height, not half
         projection: Projection::Orthographics,
         viewport: Some(viewport),
         render_target: None,
-        aspect: None,
+        aspect: None, // auto-calculated from viewport or screen
         z_near: 0.01,
         z_far: 10000.0,
     };
@@ -84,5 +92,68 @@ fn mesh_data_to_macro_mesh(mesh_data: &MeshData, color: Color) -> MacroMesh {
         vertices,
         indices,
         texture: None,
+    }
+}
+
+//
+// Per-panel camera setup
+//
+
+impl PanelCameraVectors for PanelState2D {
+    fn to_target_vec(&self) -> Vec3 {
+        match self.viewing_plane() {
+            PanelViewingPlane::XY => vec3(self.pan().x, self.pan().y, 0.0),
+            PanelViewingPlane::XZ => vec3(self.pan().x, 0.0, self.pan().y),
+            PanelViewingPlane::YZ => vec3(0.0, self.pan().x, self.pan().y),
+        }
+    }
+
+    fn to_camera_pos_vec(&self) -> Vec3 {
+        let offset = self.distance() * if self.is_flipped() { -1.0 } else { 1.0 };
+        match self.viewing_plane() {
+            PanelViewingPlane::XY => vec3(self.pan().x, self.pan().y, offset),
+            PanelViewingPlane::XZ => vec3(self.pan().x, offset, self.pan().y),
+            PanelViewingPlane::YZ => vec3(offset, self.pan().x, self.pan().y),
+        }
+    }
+
+    fn to_up_vec(&self) -> Vec3 {
+        match self.viewing_plane() {
+            PanelViewingPlane::XY => vec3(0.0, 1.0, 0.0),
+            PanelViewingPlane::XZ => vec3(0.0, 0.0, 1.0),
+            PanelViewingPlane::YZ => vec3(0.0, 1.0, 0.0),
+        }
+    }
+
+    fn to_model_rotation(&self) -> Vec3 {
+        vec3(0.0, 0.0, 0.0)
+    }
+
+    fn distance(&self) -> f32 {
+        PanelState2D::distance(self)
+    }
+}
+
+impl PanelCameraVectors for PanelStateFreeCam {
+    fn to_target_vec(&self) -> Vec3 {
+        vec3(0.0, 0.0, 0.0)
+    }
+
+    fn to_camera_pos_vec(&self) -> Vec3 {
+        // Fixed camera position along Z axis at distance
+        vec3(0.0, 0.0, self.distance())
+    }
+
+    fn to_up_vec(&self) -> Vec3 {
+        vec3(0.0, 1.0, 0.0)
+    }
+
+    fn to_model_rotation(&self) -> Vec3 {
+        // rotation.x = yaw (Y axis), rotation.y = pitch (X axis)
+        vec3(self.rotation().y, self.rotation().x, 0.0)
+    }
+
+    fn distance(&self) -> f32 {
+        PanelStateFreeCam::distance(self)
     }
 }

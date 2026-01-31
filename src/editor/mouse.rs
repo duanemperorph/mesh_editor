@@ -14,7 +14,10 @@ enum SelectedPanel<'a> {
 
 pub fn handle_mouse_input<'a>(editor_state: &'a mut EditorState, panes: &Panes) {
     // handle mouse events and stuff
-    let panel = get_panel_under_coords_mut(vec2(1.0, 1.0), editor_state, panes);
+    let panel = get_panel_under_coords_mut(vec2(1.0, 1.0), editor_state, panes) else {
+        println!("Failed to get the panel under mouse ");
+        return;
+    };
 }
 
 fn get_panel_under_coords_mut<'a>(
