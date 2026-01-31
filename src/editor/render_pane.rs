@@ -20,15 +20,20 @@ pub fn render_editor_pane_viewport(
     mesh: &MeshData,
     viewport: Viewport,
 ) {
+    let aspect = (viewport.2 as f32) / (viewport.3 as f32);
+    let fovy = panel_state.distance() * 2.0;
+
+    // let fovy = if aspect < 1.0 { aspect * fovy } else { fovy };
+
     let camera = Camera3D {
         position: panel_state.to_camera_pos_vec(),
         target: panel_state.to_target_vec(),
         up: panel_state.to_up_vec(),
-        fovy: panel_state.distance() * 2.0, // total height, not half
+        fovy: fovy,
         projection: Projection::Orthographics,
         viewport: Some(viewport),
         render_target: None,
-        aspect: None, // auto-calculated from viewport or screen
+        aspect: Some(aspect),
         z_near: 0.01,
         z_far: 10000.0,
     };

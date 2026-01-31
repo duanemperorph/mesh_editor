@@ -34,7 +34,7 @@ use screen_to_world::*;
 
 #[macroquad::main("Mesh Editor")]
 async fn main() {
-    let mut current_mesh = MeshData::new_cube();
+    let mut current_mesh = MeshData::new_tapered_box();
     let mut editor_state = EditorState::new();
 
     loop {
