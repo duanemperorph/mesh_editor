@@ -30,6 +30,7 @@ pub fn handle_mouse_input<'a>(editor_state: &'a mut EditorState, panes: &Panes) 
         } else if is_mouse_button_pressed(MouseButton::Middle) {
             handle_reset_pan(panel);
         }
+        handle_mouse_wheel_2d(panel);
     }
 }
 
@@ -41,6 +42,14 @@ fn handle_mouse_pan(panel: &mut PanelState2D, viewport: Rect) {
 
 fn handle_reset_pan(panel: &mut PanelState2D) {
     *panel.pan_mut() = vec2(0.0, 0.0);
+    *panel.distance_mut() = 10.0;
+}
+
+fn handle_mouse_wheel_2d(panel: &mut PanelState2D) {
+    let (_, wheel_y) = mouse_wheel();
+    if wheel_y != 0.0 {
+        *panel.distance_mut() -= wheel_y / 500.0;
+    }
 }
 
 fn get_panel_under_coords_mut<'a>(

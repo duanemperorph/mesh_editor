@@ -18,8 +18,6 @@ pub fn screen_fraction_to_world_scale_vec2(
     let screen_width_fraction = (viewport.w as f32) / screen_width();
     let screen_height_fraction = (viewport.h as f32) / screen_height();
 
-    println!("calced aspect: {}", aspect);
-
     let world_dx = -screen_delta.x * fovy * aspect / screen_width_fraction;
     let world_dy = -screen_delta.y * fovy / screen_height_fraction;
 
