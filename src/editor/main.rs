@@ -29,6 +29,9 @@ use global_commands::*;
 mod viewer_commands;
 use viewer_commands::*;
 
+mod viewer_selection;
+use viewer_selection::*;
+
 #[macroquad::main("Mesh Editor")]
 async fn main() {
     let mut current_mesh = MeshData::new_tapered_box();

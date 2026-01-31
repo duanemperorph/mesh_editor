@@ -19,13 +19,13 @@ pub fn handle_global_keyboard_commands(editor_state: &mut EditorState) {
         editor_state.set_input_mode(InputMode::SelectVerts);
     }
     if is_key_pressed(KeyCode::F2) {
-        editor_state.set_input_mode(InputMode::SelectLines);
-    }
-    if is_key_pressed(KeyCode::F3) {
         editor_state.set_input_mode(InputMode::SelectPolys);
     }
-    if is_key_pressed(KeyCode::F4) {
+    if is_key_pressed(KeyCode::F3) {
         editor_state.set_input_mode(InputMode::InsertVerts);
+    }
+    if is_key_pressed(KeyCode::F4) {
+        editor_state.set_input_mode(InputMode::EditModel);
     }
 }
 

@@ -2,7 +2,8 @@
 // mesh -> custom mesh format
 //
 
-use macroquad::prelude::Vec3;
+use itertools::Itertools;
+use macroquad::prelude::*;
 use std::collections::HashSet;
 use std::fmt;
 
@@ -294,4 +295,50 @@ fn add_cube_lines_and_faces(mesh: &mut Mesh) {
     mesh.add_poly(vec![3, 2, 6, 7]); // top
     mesh.add_poly(vec![0, 3, 7, 4]); // left
     mesh.add_poly(vec![1, 5, 6, 2]); // right
+}
+
+//
+// Finding points within radius of target coord
+// (e.g. used for selection)
+//
+
+impl Mesh {
+    pub fn find_verts_xy(&self, target_coord_xy: Vec2, radius: f32) -> Vec<VertIndex> {
+        self.verticies
+            .iter()
+            .enumerate()
+            .filter(|(_, v)| {
+                let v2d = vec2(v.x, v.y);
+                return target_coord_xy.distance(v2d) <= radius;
+            })
+            .sorted_by(|a, b| a.1.z.total_cmp(&b.1.z))
+            .map(|(i, _)| i)
+            .collect()
+    }
+
+    pub fn find_verts_xz(&self, target_coord_xz: Vec2, radius: f32) -> Vec<VertIndex> {
+        self.verticies
+            .iter()
+            .enumerate()
+            .filter(|(_, v)| {
+                let v2d = vec2(v.x, v.z);
+                return target_coord_xz.distance(v2d) <= radius;
+            })
+            .sorted_by(|a, b| a.1.y.total_cmp(&b.1.y))
+            .map(|(i, _)| i)
+            .collect()
+    }
+
+    pub fn find_verts_yz(&self, target_coord_yz: Vec2, radius: f32) -> Vec<VertIndex> {
+        self.verticies
+            .iter()
+            .enumerate()
+            .filter(|(_, v)| {
+                let v2d = vec2(v.y, v.z);
+                return target_coord_yz.distance(v2d) <= radius;
+            })
+            .sorted_by(|a, b| a.1.x.total_cmp(&b.1.x))
+            .map(|(i, _)| i)
+            .collect()
+    }
 }

@@ -4,9 +4,7 @@
 
 use crate::editor_panel_state::*;
 use crate::insert_preview_state::*;
-use crate::panes::Panes;
-use macroquad::prelude::*;
-use mesh_editor::mesh::{Line, LineIndex, Poly, PolyIndex, VertIndex};
+use mesh_editor::mesh::{LineIndex, PolyIndex, VertIndex};
 use strum::Display;
 
 pub enum Selection {
@@ -19,9 +17,9 @@ pub enum Selection {
 #[derive(Display)]
 pub enum InputMode {
     SelectVerts,
-    SelectLines,
     SelectPolys,
     InsertVerts,
+    EditModel,
 }
 
 #[derive(PartialEq)]
