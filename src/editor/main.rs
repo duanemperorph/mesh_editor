@@ -8,6 +8,12 @@ use mesh_editor::mesh::{Mesh as MeshData, *};
 mod editor_state;
 use editor_state::*;
 
+mod editor_panel_state;
+use editor_panel_state::*;
+
+mod insert_preview_state;
+use insert_preview_state::*;
+
 mod status_text;
 use status_text::*;
 
@@ -20,15 +26,19 @@ use render_pane::*;
 mod keyboard;
 use keyboard::*;
 
+mod mouse;
+use mouse::*;
+
 #[macroquad::main("Mesh Editor")]
 async fn main() {
     let mut current_mesh = MeshData::new_cube();
     let mut editor_state = EditorState::new();
 
     loop {
-        handle_key_presses(&mut editor_state);
-
         let panes = Panes::calc_from_screen_dims();
+
+        handle_key_presses(&mut editor_state);
+        handle_mouse_input(&mut editor_state, &panes);
 
         clear_background(BLACK);
 

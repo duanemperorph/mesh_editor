@@ -2,7 +2,7 @@
 // render_pane -> pane renderer functions
 //
 
-use crate::editor_state::*;
+use crate::editor_panel_state::*;
 use crate::panes::Viewport;
 use macroquad::prelude::{Mesh as MacroMesh, *};
 use mesh_editor::mesh::Mesh as MeshData;

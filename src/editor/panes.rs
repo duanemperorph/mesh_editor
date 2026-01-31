@@ -8,6 +8,14 @@ const STATUS_BAR_HEIGHT: f32 = 20.0;
 
 pub type Viewport = (i32, i32, i32, i32);
 
+pub enum PaneId {
+    Left,
+    TopRight,
+    BottomRight,
+    FullContent,
+    BottomBar,
+}
+
 pub struct Panes {
     left: Rect,
     top_right: Rect,
@@ -93,6 +101,32 @@ impl Panes {
             center_border_x,
             right_side_border_y,
             bottom_border,
+        }
+    }
+
+    pub fn get_pane_under_coords(
+        &self,
+        coord: Vec2,
+        is_in_full_content_mode: bool,
+    ) -> Option<PaneId> {
+        if self.bottom_bar.contains(coord) {
+            return Some(PaneId::BottomBar);
+        } else if is_in_full_content_mode {
+            if self.full_content.contains(coord) {
+                return Some(PaneId::FullContent);
+            } else {
+                return None;
+            }
+        } else {
+            if self.left.contains(coord) {
+                return Some(PaneId::Left);
+            } else if self.top_right.contains(coord) {
+                return Some(PaneId::TopRight);
+            } else if self.bottom_right.contains(coord) {
+                return Some(PaneId::BottomRight);
+            } else {
+                return None;
+            }
         }
     }
 }

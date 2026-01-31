@@ -3,6 +3,7 @@
 //
 
 use crate::editor_state::*;
+use crate::insert_preview_state::*;
 use macroquad::prelude::*;
 use mesh_editor::mesh::{Mesh as MeshData, *};
 
