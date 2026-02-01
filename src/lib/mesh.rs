@@ -128,10 +128,23 @@ impl Mesh {
             .collect()
     }
 
+    pub fn selected_polys_to_triangle_indicies(
+        &self,
+        selected_poly_indicies: &HashSet<PolyIndex>,
+    ) -> Vec<VertIndex> {
+        self.polys
+            .iter()
+            .enumerate()
+            .filter(|(i, _)| selected_poly_indicies.contains(i))
+            .map(|(_, p)| Self::poly_indicies_to_triangle_indicies(p))
+            .flatten()
+            .collect()
+    }
+
     //
     // uses triangle fan to get indicies for each triangle
     //
-    fn poly_indicies_to_triangle_indicies(poly: &Poly) -> Vec<VertIndex> {
+    pub fn poly_indicies_to_triangle_indicies(poly: &Poly) -> Vec<VertIndex> {
         if poly.len() < 3 {
             return vec![];
         }

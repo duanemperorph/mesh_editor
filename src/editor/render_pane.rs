@@ -49,7 +49,12 @@ pub fn render_editor_pane_viewport(
     let selected_lines = mesh.lines_in_vertex_indicies(selected_verts);
     let selected_polys = mesh.polys_in_vertex_indicies(selected_verts);
 
-    render_mesh(mesh, &selected_polys);
+    render_mesh(mesh);
+
+    if (selected_polys.len() > 0) {
+        render_mesh_selected_polys(mesh, &selected_polys)
+    }
+
     render_lines(mesh, &selected_lines);
     render_points(mesh, &selected_verts);
     pop_model_matrix()
@@ -72,7 +77,7 @@ fn render_points(mesh: &MeshData, selected_points: &HashSet<VertIndex>) {
 
 fn render_lines(mesh: &MeshData, selected_lines: &HashSet<LineIndex>) {
     let unselected_color = Color::new(0.85, 0.85, 0.85, 1.0);
-    let selected_color = Color::new(0.7, 0.2, 0.2, 1.0);
+    let selected_color = Color::new(0.4, 0.1, 0.1, 1.0);
 
     for (i, (v1, v2)) in mesh.lines_to_vert_pairs().iter().enumerate() {
         let color = if selected_lines.contains(&i) {
@@ -87,10 +92,18 @@ fn render_lines(mesh: &MeshData, selected_lines: &HashSet<LineIndex>) {
 //
 // Render mesh in one go zoom zoom
 //
-fn render_mesh(mesh: &MeshData, selected_polys: &HashSet<PolyIndex>) {
+fn render_mesh(mesh: &MeshData) {
     let unselected_color = GRAY;
-    let selected_color = Color::new(0.5, 0.15, 0.15, 1.0);
     let mesh = mesh_data_to_macro_mesh(mesh, unselected_color);
+    draw_mesh(&mesh);
+}
+
+//
+// Render mesh in one go zoom zoom
+//
+fn render_mesh_selected_polys(mesh: &MeshData, selected_polys: &HashSet<PolyIndex>) {
+    let selected_color = Color::new(0.5, 0.35, 0.35, 1.0);
+    let mesh = selected_polys_to_macro_mesh(mesh, selected_polys, selected_color);
     draw_mesh(&mesh);
 }
 
@@ -112,11 +125,34 @@ fn mesh_data_to_macro_mesh(mesh_data: &MeshData, color: Color) -> MacroMesh {
         .map(|index| *index as u16)
         .collect();
 
-    pub struct Mesh {
-        pub vertices: Vec<Vertex>,
-        pub indices: Vec<u16>,
-        pub texture: Option<Texture2D>,
+    MacroMesh {
+        vertices,
+        indices,
+        texture: None,
     }
+}
+
+fn selected_polys_to_macro_mesh(
+    mesh_data: &MeshData,
+    selected_polys: &HashSet<PolyIndex>,
+    color: Color,
+) -> MacroMesh {
+    let vertices = mesh_data
+        .verts()
+        .iter()
+        .map(|v| Vertex {
+            position: *v,
+            uv: Vec2::ZERO,
+            color: color.into(),
+            normal: Vec4::ZERO,
+        })
+        .collect();
+
+    let indices = mesh_data
+        .selected_polys_to_triangle_indicies(selected_polys)
+        .iter()
+        .map(|index| *index as u16)
+        .collect();
 
     MacroMesh {
         vertices,
