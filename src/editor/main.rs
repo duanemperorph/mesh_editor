@@ -69,7 +69,7 @@ async fn main() {
             );
         } else {
             render_editor_pane_viewport(
-                editor_state.panel_state_rotate_cam(),
+                editor_state.panel_state_free_cam(),
                 &current_mesh,
                 &editor_state.selection(),
                 panes.full_content_viewport(),

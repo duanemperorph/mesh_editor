@@ -9,50 +9,57 @@ use macroquad::prelude::*;
 use mesh_editor::mesh::{Mesh as MeshData, *};
 use std::f32::consts::PI;
 
-enum SelectedPanel<'a> {
-    Panel2DView(&'a mut PanelState2D),
-    PanelFreeCam(&'a mut PanelStateFreeCam),
+#[derive(Copy, Clone)]
+enum PanelSelector {
+    Editor2D(PanelViewingPlane),
+    FreeCam,
     BottomBar,
 }
 
-type SelectedPanelInfo<'a> = (SelectedPanel<'a>, Rect);
+type SelectedPanelInfo = (PanelSelector, Rect);
 
 pub fn handle_viewer_commands<'a>(
-    editor_state: &'a mut EditorState,
+    editor_state_mut: &'a mut EditorState,
     mesh: &MeshData,
     panes: &Panes,
 ) {
     let current_mouse_coords = mouse_position().into();
 
-    let Some((panel, viewport)) =
-        get_panel_under_coords_mut(current_mouse_coords, editor_state, panes)
+    let Some((selector, viewport)) =
+        get_panel_selector_under_coords(current_mouse_coords, editor_state_mut, panes)
     else {
         return;
     };
 
-    if let SelectedPanel::Panel2DView(panel) = panel {
+    if let PanelSelector::Editor2D(viewing_plane) = selector {
         if is_mouse_button_down(MouseButton::Right) {
-            handle_mouse_pan(panel, viewport);
+            let panel_mut = editor_state_mut.panel_state_2d_from_plane_mut(viewing_plane);
+            handle_mouse_pan(panel_mut, viewport);
         } else if is_mouse_button_pressed(MouseButton::Middle) {
-            handle_reset_pan(panel);
+            let panel_mut = editor_state_mut.panel_state_2d_from_plane_mut(viewing_plane);
+            handle_reset_pan(panel_mut);
         } else if is_mouse_button_pressed(MouseButton::Left) {
-            let panel = *panel;
+            let panel = editor_state_mut.panel_state_2d_from_plane(viewing_plane);
+            // let panel = *panel;
             if let Some(index) =
                 get_vert_index_under_mouse(current_mouse_coords, mesh, &panel, viewport)
             {
-                editor_state
+                editor_state_mut
                     .selection_mut()
                     .toggle_selected_vert_index(index);
             }
         }
-        handle_mouse_wheel_2d(panel);
-    } else if let SelectedPanel::PanelFreeCam(panel) = panel {
+        let panel_mut = editor_state_mut.panel_state_2d_from_plane_mut(viewing_plane);
+        handle_mouse_wheel_2d(panel_mut);
+    } else if let PanelSelector::FreeCam = selector {
+        let free_cam_panel_mut = editor_state_mut.panel_state_free_cam_mut();
+
         if is_mouse_button_down(MouseButton::Right) {
-            handle_mouse_rotation(panel, viewport);
+            handle_mouse_rotation(free_cam_panel_mut, viewport);
         } else if is_mouse_button_pressed(MouseButton::Middle) {
-            handle_reset_free_cam(panel);
+            handle_reset_free_cam(free_cam_panel_mut);
         }
-        handle_mouse_wheel_free_cam(panel);
+        handle_mouse_wheel_free_cam(free_cam_panel_mut);
     }
 }
 
@@ -92,27 +99,25 @@ fn handle_reset_free_cam(panel: &mut PanelStateFreeCam) {
     *panel.distance_mut() = 10.0;
 }
 
-fn get_panel_under_coords_mut<'a>(
+fn get_panel_selector_under_coords(
     coords: Vec2,
-    editor_state: &'a mut EditorState,
+    editor_state: &EditorState,
     panes: &Panes,
-) -> Option<SelectedPanelInfo<'a>> {
+) -> Option<SelectedPanelInfo> {
     let is_in_full_content_mode = *editor_state.viewer_mode() == ViewerMode::FreeCam;
     let Some(pane) = panes.get_pane_under_coords(coords, is_in_full_content_mode) else {
         return None;
     };
 
-    let panel = match pane.pane_id {
-        PaneId::FullContent => {
-            SelectedPanel::PanelFreeCam(editor_state.panel_state_rotate_cam_mut())
-        }
-        PaneId::Left => SelectedPanel::Panel2DView(editor_state.panel_state_xz_mut()),
-        PaneId::TopRight => SelectedPanel::Panel2DView(editor_state.panel_state_yz_mut()),
-        PaneId::BottomRight => SelectedPanel::Panel2DView(editor_state.panel_state_xy_mut()),
-        PaneId::BottomBar => SelectedPanel::BottomBar,
+    let selector = match pane.pane_id {
+        PaneId::FullContent => PanelSelector::FreeCam,
+        PaneId::Left => PanelSelector::Editor2D(PanelViewingPlane::XZ),
+        PaneId::TopRight => PanelSelector::Editor2D(PanelViewingPlane::YZ),
+        PaneId::BottomRight => PanelSelector::Editor2D(PanelViewingPlane::XY),
+        PaneId::BottomBar => PanelSelector::BottomBar,
     };
 
-    return Some((panel, pane.viewport_rect));
+    return Some((selector, pane.viewport_rect));
 }
 
 pub fn rotation_from_mouse_delta(mouse_delta: Vec2, viewport: Rect) -> Vec2 {

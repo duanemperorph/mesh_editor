@@ -26,7 +26,7 @@ pub struct EditorState {
     panel_state_xz: PanelState2D,
     panel_state_yz: PanelState2D,
     panel_state_xy: PanelState2D,
-    panel_state_rotate_cam: PanelStateFreeCam,
+    panel_state_free_cam: PanelStateFreeCam,
     insert_preview: InsertPreview,
     viewer_mode: ViewerMode,
 }
@@ -43,7 +43,7 @@ impl EditorState {
             panel_state_xz: PanelState2D::new(PanelViewingPlane::XZ),
             panel_state_yz: PanelState2D::new(PanelViewingPlane::YZ),
             panel_state_xy: PanelState2D::new(PanelViewingPlane::XY),
-            panel_state_rotate_cam: PanelStateFreeCam::new(),
+            panel_state_free_cam: PanelStateFreeCam::new(),
             viewer_mode: ViewerMode::EditorPanels,
             insert_preview: InsertPreview::new(),
         }
@@ -72,40 +72,43 @@ impl EditorState {
         &self.panel_state_xz
     }
 
-    pub fn panel_state_xz_mut(&mut self) -> &mut PanelState2D {
-        &mut self.panel_state_xz
-    }
-
     pub fn panel_state_yz(&self) -> &PanelState2D {
         &self.panel_state_yz
     }
 
-    pub fn panel_state_yz_mut(&mut self) -> &mut PanelState2D {
-        &mut self.panel_state_yz
-    }
-
-    pub fn panel_state_rotate_cam(&self) -> &PanelStateFreeCam {
-        &self.panel_state_rotate_cam
-    }
-
-    pub fn panel_state_rotate_cam_mut(&mut self) -> &mut PanelStateFreeCam {
-        &mut self.panel_state_rotate_cam
+    pub fn panel_state_free_cam(&self) -> &PanelStateFreeCam {
+        &self.panel_state_free_cam
     }
 
     pub fn panel_state_xy(&self) -> &PanelState2D {
         &self.panel_state_xy
     }
 
-    pub fn panel_state_xy_mut(&mut self) -> &mut PanelState2D {
-        &mut self.panel_state_xy
+    pub fn panel_state_2d_from_plane_mut(
+        &mut self,
+        viewing_plane: PanelViewingPlane,
+    ) -> &mut PanelState2D {
+        match (viewing_plane) {
+            PanelViewingPlane::XZ => &mut self.panel_state_xz,
+            PanelViewingPlane::XY => &mut self.panel_state_xy,
+            PanelViewingPlane::YZ => &mut self.panel_state_yz,
+        }
+    }
+
+    pub fn panel_state_2d_from_plane(&self, viewing_plane: PanelViewingPlane) -> &PanelState2D {
+        match (viewing_plane) {
+            PanelViewingPlane::XZ => &self.panel_state_xz,
+            PanelViewingPlane::XY => &self.panel_state_xy,
+            PanelViewingPlane::YZ => &self.panel_state_yz,
+        }
+    }
+
+    pub fn panel_state_free_cam_mut(&mut self) -> &mut PanelStateFreeCam {
+        &mut self.panel_state_free_cam
     }
 
     pub fn insert_preview(&self) -> &InsertPreview {
         &self.insert_preview
-    }
-
-    pub fn insert_preview_mut(&mut self) -> &mut InsertPreview {
-        &mut self.insert_preview
     }
 
     pub fn viewer_mode(&self) -> &ViewerMode {
