@@ -2,18 +2,12 @@
 // mesh -> custom mesh format
 //
 
+use crate::mesh_bfs::mesh_bfs;
+pub use crate::mesh_types::*;
 use itertools::Itertools;
 use macroquad::prelude::*;
 use std::collections::HashSet;
 use std::fmt;
-
-pub type VertIndex = usize;
-pub type LineIndex = usize;
-pub type PolyIndex = usize;
-
-pub type Line = (VertIndex, VertIndex);
-pub type Poly = Vec<VertIndex>;
-pub type TriangleVerts = (Vec3, Vec3, Vec3);
 
 pub enum MirrorMode {
     None,
@@ -311,7 +305,7 @@ fn add_cube_lines_and_faces(mesh: &mut Mesh) {
 }
 
 //
-// Finding points within radius of target coord
+// Finding points
 // (e.g. used for selection)
 //
 
@@ -389,5 +383,13 @@ impl Mesh {
             })
             .map(|(i, _)| i)
             .collect()
+    }
+
+    pub fn find_verts_between(
+        &self,
+        start_index: VertIndex,
+        end_index: VertIndex,
+    ) -> Vec<VertIndex> {
+        mesh_bfs(start_index, end_index, &self.lines)
     }
 }
