@@ -3,6 +3,7 @@
 //
 use crate::editor_panel_state::*;
 use crate::editor_state::*;
+use crate::keyboard::check_modifier_keys;
 use crate::panes::*;
 use crate::screen_to_world::*;
 use macroquad::prelude::*;
@@ -44,9 +45,24 @@ pub fn handle_viewer_commands<'a>(
             if let Some(index) =
                 get_vert_index_under_mouse(current_mouse_coords, mesh, &panel, viewport)
             {
-                editor_state_mut
-                    .selection_mut()
-                    .toggle_selected_vert_index(index);
+                let mod_keys = check_modifier_keys();
+                let selection_mut = editor_state_mut.selection_mut();
+
+                if mod_keys.shift_key {
+                    if selection_mut.selected_vert_indicies().len() == 1 {
+                        let start_index = *selection_mut
+                            .selected_vert_indicies()
+                            .iter()
+                            .next()
+                            .unwrap();
+                        let verts_between = mesh.find_verts_between(start_index, index);
+                        selection_mut.replace_selected_vert_indicies(&verts_between);
+                    }
+                } else if mod_keys.meta_key {
+                    selection_mut.toggle_selected_vert_index(index);
+                } else {
+                    selection_mut.replace_selected_vert_indicies(&[index]);
+                }
             }
         }
         let panel_mut = editor_state_mut.panel_state_2d_from_plane_mut(viewing_plane);

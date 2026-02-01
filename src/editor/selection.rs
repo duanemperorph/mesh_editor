@@ -19,15 +19,15 @@ impl Selection {
         &self.selected_vert_indicies
     }
 
-    pub fn replace_selected_vert_indicies(&mut self, new_indicies: Vec<VertIndex>) {
-        self.selected_vert_indicies = new_indicies.into_iter().collect()
+    pub fn replace_selected_vert_indicies(&mut self, new_indicies: &[VertIndex]) {
+        self.selected_vert_indicies = new_indicies.iter().copied().collect()
     }
 
-    pub fn add_selected_vert_indicies(&mut self, new_indicies: Vec<VertIndex>) {
+    pub fn add_selected_vert_indicies(&mut self, new_indicies: &[VertIndex]) {
         self.selected_vert_indicies.extend(new_indicies);
     }
 
-    pub fn remove_selected_vert_indicies(&mut self, remove_indicies: Vec<VertIndex>) {
+    pub fn remove_selected_vert_indicies(&mut self, remove_indicies: &[VertIndex]) {
         for remove_index in remove_indicies {
             self.selected_vert_indicies.remove(&remove_index);
         }

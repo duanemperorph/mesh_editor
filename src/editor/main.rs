@@ -23,8 +23,7 @@ use panes::*;
 mod render_pane;
 use render_pane::*;
 
-mod global_commands;
-use global_commands::*;
+mod keyboard;
 
 mod viewer_commands;
 use viewer_commands::*;
@@ -84,5 +83,14 @@ async fn main() {
         draw_status_text(&editor_state, &current_mesh);
 
         next_frame().await
+    }
+}
+
+pub fn handle_global_keyboard_commands(editor_state: &mut EditorState) {
+    if is_key_pressed(KeyCode::Tab) {
+        editor_state.toggle_viewer_mode();
+    }
+    if is_key_pressed(KeyCode::Space) {
+        editor_state.toggle_input_mode();
     }
 }
