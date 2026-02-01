@@ -9,10 +9,8 @@ mod editor_state;
 use editor_state::*;
 
 mod editor_panel_state;
-use editor_panel_state::*;
 
 mod insert_preview_state;
-use insert_preview_state::*;
 
 mod status_text;
 use status_text::*;
@@ -25,14 +23,15 @@ use render_pane::*;
 
 mod keyboard;
 
-mod viewer_commands;
-use viewer_commands::*;
+mod mouse_commands;
+use mouse_commands::*;
 
 mod screen_to_world;
-use screen_to_world::*;
 
 mod selection;
-use selection::*;
+
+mod keyboard_commands;
+use keyboard_commands::*;
 
 #[macroquad::main("Mesh Editor")]
 async fn main() {
@@ -42,8 +41,8 @@ async fn main() {
     loop {
         let panes = Panes::calc_from_screen_dims();
 
-        handle_global_keyboard_commands(&mut editor_state);
-        handle_viewer_commands(&mut editor_state, &current_mesh, &panes);
+        handle_keyboard_commands(&mut editor_state, &mut current_mesh);
+        handle_mouse_commands(&mut editor_state, &current_mesh, &panes);
 
         clear_background(BLACK);
 
@@ -83,14 +82,5 @@ async fn main() {
         draw_status_text(&editor_state, &current_mesh);
 
         next_frame().await
-    }
-}
-
-pub fn handle_global_keyboard_commands(editor_state: &mut EditorState) {
-    if is_key_pressed(KeyCode::Tab) {
-        editor_state.toggle_viewer_mode();
-    }
-    if is_key_pressed(KeyCode::Space) {
-        editor_state.toggle_input_mode();
     }
 }

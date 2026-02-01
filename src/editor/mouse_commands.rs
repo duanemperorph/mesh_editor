@@ -19,7 +19,7 @@ enum PanelSelector {
 
 type SelectedPanelInfo = (PanelSelector, Rect);
 
-pub fn handle_viewer_commands<'a>(
+pub fn handle_mouse_commands<'a>(
     editor_state_mut: &'a mut EditorState,
     mesh: &MeshData,
     panes: &Panes,
