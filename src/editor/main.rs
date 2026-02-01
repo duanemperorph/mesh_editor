@@ -32,6 +32,9 @@ use viewer_commands::*;
 mod viewer_selection;
 use viewer_selection::*;
 
+mod screen_to_world;
+use screen_to_world::*;
+
 #[macroquad::main("Mesh Editor")]
 async fn main() {
     let mut current_mesh = MeshData::new_tapered_box();
@@ -41,7 +44,7 @@ async fn main() {
         let panes = Panes::calc_from_screen_dims();
 
         handle_global_keyboard_commands(&mut editor_state);
-        handle_viewer_commands(&mut editor_state, &panes);
+        handle_viewer_commands(&mut editor_state, &current_mesh, &panes);
 
         clear_background(BLACK);
 

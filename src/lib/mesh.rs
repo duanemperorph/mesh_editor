@@ -341,4 +341,47 @@ impl Mesh {
             .map(|(i, _)| i)
             .collect()
     }
+
+    pub fn lines_in_vertex_indicies(&self, indicies: Vec<VertIndex>) -> Vec<LineIndex> {
+        let index_set: HashSet<VertIndex> = indicies.iter().copied().collect();
+
+        self.lines
+            .iter()
+            .enumerate()
+            .filter(|(_, l)| index_set.contains(&l.0) && index_set.contains(&l.1))
+            .map(|(i, _)| i)
+            .collect()
+    }
+
+    pub fn polys_in_vertex_indicies(&self, indicies: Vec<VertIndex>) -> Vec<PolyIndex> {
+        let index_set: HashSet<VertIndex> = indicies.iter().copied().collect();
+
+        self.polys
+            .iter()
+            .enumerate()
+            .filter(|(_, poly)| {
+                let matching_indicies_count = poly.iter().filter(|i| index_set.contains(i)).count();
+                return matching_indicies_count == poly.len();
+            })
+            .map(|(i, _)| i)
+            .collect()
+    }
+
+    pub fn polys_partially_in_vertex_indicies(
+        &self,
+        indicies: Vec<VertIndex>,
+        min_matching_verts: usize,
+    ) -> Vec<PolyIndex> {
+        let index_set: HashSet<VertIndex> = indicies.iter().copied().collect();
+
+        self.polys
+            .iter()
+            .enumerate()
+            .filter(|(_, poly)| {
+                let matching_indicies_count = poly.iter().filter(|i| index_set.contains(i)).count();
+                return matching_indicies_count >= min_matching_verts;
+            })
+            .map(|(i, _)| i)
+            .collect()
+    }
 }

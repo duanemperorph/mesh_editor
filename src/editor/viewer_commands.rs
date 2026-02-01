@@ -4,7 +4,10 @@
 use crate::editor_panel_state::*;
 use crate::editor_state::*;
 use crate::panes::*;
+use crate::screen_to_world::*;
+use crate::viewer_selection::*;
 use macroquad::prelude::*;
+use mesh_editor::mesh::Mesh as MeshData;
 use std::f32::consts::PI;
 
 enum SelectedPanel<'a> {
@@ -15,7 +18,11 @@ enum SelectedPanel<'a> {
 
 type SelectedPanelInfo<'a> = (SelectedPanel<'a>, Rect);
 
-pub fn handle_viewer_commands<'a>(editor_state: &'a mut EditorState, panes: &Panes) {
+pub fn handle_viewer_commands<'a>(
+    editor_state: &'a mut EditorState,
+    mesh: &MeshData,
+    panes: &Panes,
+) {
     let current_mouse_coords = mouse_position().into();
 
     let Some((panel, viewport)) =
@@ -29,6 +36,8 @@ pub fn handle_viewer_commands<'a>(editor_state: &'a mut EditorState, panes: &Pan
             handle_mouse_pan(panel, viewport);
         } else if is_mouse_button_pressed(MouseButton::Middle) {
             handle_reset_pan(panel);
+        } else if is_mouse_button_pressed(MouseButton::Left) {
+            select_point_under_mouse(current_mouse_coords, mesh, panel, viewport);
         }
         handle_mouse_wheel_2d(panel);
     } else if let SelectedPanel::PanelFreeCam(panel) = panel {
@@ -43,7 +52,7 @@ pub fn handle_viewer_commands<'a>(editor_state: &'a mut EditorState, panes: &Pan
 
 fn handle_mouse_pan(panel: &mut PanelState2D, viewport: Rect) {
     let mouse_delta = mouse_delta_position();
-    let pan_delta = screen_fraction_to_world_scale_vec2(mouse_delta, panel, viewport);
+    let pan_delta = mouse_delta_to_world_scale_vec2(mouse_delta, panel, viewport);
     *panel.pan_mut() += pan_delta;
 }
 
@@ -98,25 +107,6 @@ fn get_panel_under_coords_mut<'a>(
     };
 
     return Some((panel, pane.viewport_rect));
-}
-
-//
-// Used by pan function
-//
-pub fn screen_fraction_to_world_scale_vec2(
-    screen_delta: Vec2,
-    panel: &PanelState2D,
-    viewport: Rect,
-) -> Vec2 {
-    let fovy = panel.distance();
-    let aspect = viewport.w / viewport.h;
-    let screen_width_fraction = (viewport.w as f32) / screen_width();
-    let screen_height_fraction = (viewport.h as f32) / screen_height();
-
-    let world_dx = -screen_delta.x * fovy * aspect / screen_width_fraction;
-    let world_dy = -screen_delta.y * fovy / screen_height_fraction;
-
-    return vec2(world_dx, world_dy);
 }
 
 pub fn rotation_from_mouse_delta(mouse_delta: Vec2, viewport: Rect) -> Vec2 {
