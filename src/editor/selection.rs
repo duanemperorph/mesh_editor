@@ -23,6 +23,10 @@ impl Selection {
         self.selected_vert_indicies = new_indicies.iter().copied().collect()
     }
 
+    pub fn replace_selected_vert_indicies_set(&mut self, new_indicies: HashSet<VertIndex>) {
+        self.selected_vert_indicies = new_indicies
+    }
+
     pub fn add_selected_vert_indicies(&mut self, new_indicies: &[VertIndex]) {
         self.selected_vert_indicies.extend(new_indicies);
     }
@@ -37,5 +41,9 @@ impl Selection {
         if !self.selected_vert_indicies.remove(&index) {
             self.selected_vert_indicies.insert(index);
         }
+    }
+
+    pub fn clear(&mut self) {
+        self.selected_vert_indicies.clear();
     }
 }

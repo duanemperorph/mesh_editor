@@ -12,5 +12,15 @@ pub fn handle_keyboard_commands(editor_state: &mut EditorState, mesh: &mut MeshD
     if is_key_pressed(KeyCode::Space) {
         editor_state.toggle_input_mode();
     }
-    if is_key_pressed(KeyCode::X) {}
+    if is_key_pressed(KeyCode::X) {
+        let selected_verts = editor_state.selection().selected_vert_indicies();
+        let polys = mesh.polys_partially_in_vertex_indicies(selected_verts);
+        let verts_from_polys = mesh.vert_indicies_from_poly_indicies(polys);
+        editor_state
+            .selection_mut()
+            .replace_selected_vert_indicies_set(verts_from_polys);
+    }
+    if is_key_pressed(KeyCode::Escape) {
+        editor_state.selection_mut().clear()
+    }
 }

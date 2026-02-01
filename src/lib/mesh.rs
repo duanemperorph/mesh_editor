@@ -373,7 +373,7 @@ impl Mesh {
     pub fn polys_partially_in_vertex_indicies(
         &self,
         index_set: &HashSet<VertIndex>,
-    ) -> Vec<PolyIndex> {
+    ) -> HashSet<PolyIndex> {
         self.polys
             .iter()
             .enumerate()
@@ -391,5 +391,17 @@ impl Mesh {
         end_index: VertIndex,
     ) -> Vec<VertIndex> {
         mesh_bfs(start_index, end_index, &self.lines)
+    }
+
+    pub fn vert_indicies_from_poly_indicies(
+        &self,
+        poly_indicies: HashSet<PolyIndex>,
+    ) -> HashSet<VertIndex> {
+        poly_indicies
+            .iter()
+            .filter_map(|&i| self.polys.get(i))
+            .flatten()
+            .copied()
+            .collect()
     }
 }
