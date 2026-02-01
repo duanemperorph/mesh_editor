@@ -29,11 +29,11 @@ use global_commands::*;
 mod viewer_commands;
 use viewer_commands::*;
 
-mod viewer_selection;
-use viewer_selection::*;
-
 mod screen_to_world;
 use screen_to_world::*;
+
+mod selection;
+use selection::*;
 
 #[macroquad::main("Mesh Editor")]
 async fn main() {
@@ -52,22 +52,26 @@ async fn main() {
             render_editor_pane_viewport(
                 editor_state.panel_state_xz(),
                 &current_mesh,
+                &editor_state.selection(),
                 panes.left_viewport(),
             );
             render_editor_pane_viewport(
                 editor_state.panel_state_yz(),
                 &current_mesh,
+                &editor_state.selection(),
                 panes.top_right_viewport(),
             );
             render_editor_pane_viewport(
                 editor_state.panel_state_xy(),
                 &current_mesh,
+                &editor_state.selection(),
                 panes.bottom_right_viewport(),
             );
         } else {
             render_editor_pane_viewport(
                 editor_state.panel_state_rotate_cam(),
                 &current_mesh,
+                &editor_state.selection(),
                 panes.full_content_viewport(),
             );
         }

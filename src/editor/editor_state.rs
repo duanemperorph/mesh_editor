@@ -4,22 +4,14 @@
 
 use crate::editor_panel_state::*;
 use crate::insert_preview_state::*;
+use crate::selection::*;
 use mesh_editor::mesh::{LineIndex, PolyIndex, VertIndex};
 use strum::Display;
 
-pub enum Selection {
-    None,
-    Verticies(Vec<VertIndex>),
-    Lines(Vec<LineIndex>),
-    Polys(Vec<PolyIndex>),
-}
-
 #[derive(Display)]
 pub enum InputMode {
-    SelectVerts,
-    SelectPolys,
-    InsertVerts,
-    EditModel,
+    Select,
+    Insert,
 }
 
 #[derive(PartialEq)]
@@ -46,8 +38,8 @@ pub struct EditorState {
 impl EditorState {
     pub fn new() -> EditorState {
         EditorState {
-            selection: Selection::None,
-            input_mode: InputMode::SelectVerts,
+            selection: Selection::new(),
+            input_mode: InputMode::Select,
             panel_state_xz: PanelState2D::new(PanelViewingPlane::XZ),
             panel_state_yz: PanelState2D::new(PanelViewingPlane::YZ),
             panel_state_xy: PanelState2D::new(PanelViewingPlane::XY),
@@ -69,8 +61,11 @@ impl EditorState {
         &self.input_mode
     }
 
-    pub fn set_input_mode(&mut self, mode: InputMode) {
-        self.input_mode = mode;
+    pub fn toggle_input_mode(&mut self) {
+        self.input_mode = match self.input_mode {
+            InputMode::Select => InputMode::Insert,
+            InputMode::Insert => InputMode::Select,
+        }
     }
 
     pub fn panel_state_xz(&self) -> &PanelState2D {

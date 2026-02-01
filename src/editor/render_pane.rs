@@ -4,8 +4,10 @@
 
 use crate::editor_panel_state::*;
 use crate::panes::Viewport;
+use crate::selection::Selection;
 use macroquad::prelude::{Mesh as MacroMesh, *};
-use mesh_editor::mesh::Mesh as MeshData;
+use mesh_editor::mesh::{Mesh as MeshData, *};
+use std::collections::HashSet;
 
 pub trait PanelCameraVectors {
     fn to_target_vec(&self) -> Vec3;
@@ -18,6 +20,7 @@ pub trait PanelCameraVectors {
 pub fn render_editor_pane_viewport(
     panel_state: &impl PanelCameraVectors,
     mesh: &MeshData,
+    selection: &Selection,
     viewport: Viewport,
 ) {
     let aspect = (viewport.2 as f32) / (viewport.3 as f32);
@@ -40,37 +43,54 @@ pub fn render_editor_pane_viewport(
     // apply panel model rotation matrix if needed;
     let rotation = panel_state.to_model_rotation();
     let rotation_matrix = Mat4::from_euler(EulerRot::XYZ, rotation.x, rotation.y, rotation.z);
-
     push_model_matrix(rotation_matrix);
-    render_mesh(mesh);
-    render_lines(mesh);
-    render_points(mesh);
+
+    let selected_verts = selection.selected_vert_indicies();
+    let selected_lines = mesh.lines_in_vertex_indicies(selected_verts);
+    let selected_polys = mesh.polys_in_vertex_indicies(selected_verts);
+
+    render_mesh(mesh, &selected_polys);
+    render_lines(mesh, &selected_lines);
+    render_points(mesh, &selected_verts);
     pop_model_matrix()
 }
 
-fn render_points(mesh: &MeshData) {
-    let sphere_color = RED;
+fn render_points(mesh: &MeshData, selected_points: &HashSet<VertIndex>) {
+    let unselected_color = WHITE;
+    let selected_color = RED;
     let sphere_radius = 0.05;
 
-    for v in mesh.verts() {
-        draw_sphere(*v, sphere_radius, None, sphere_color);
+    for (i, v) in mesh.verts().iter().enumerate() {
+        let color = if selected_points.contains(&i) {
+            selected_color
+        } else {
+            unselected_color
+        };
+        draw_sphere(*v, sphere_radius, None, color);
     }
 }
 
-fn render_lines(mesh: &MeshData) {
-    let line_color = GREEN;
+fn render_lines(mesh: &MeshData, selected_lines: &HashSet<LineIndex>) {
+    let unselected_color = Color::new(0.85, 0.85, 0.85, 1.0);
+    let selected_color = Color::new(0.7, 0.2, 0.2, 1.0);
 
-    for (v1, v2) in mesh.lines_to_vert_pairs() {
-        draw_line_3d(v1, v2, line_color);
+    for (i, (v1, v2)) in mesh.lines_to_vert_pairs().iter().enumerate() {
+        let color = if selected_lines.contains(&i) {
+            selected_color
+        } else {
+            unselected_color
+        };
+        draw_line_3d(*v1, *v2, color);
     }
 }
 
 //
 // Render mesh in one go zoom zoom
 //
-fn render_mesh(mesh: &MeshData) {
-    let color = GRAY;
-    let mesh = mesh_data_to_macro_mesh(mesh, GRAY);
+fn render_mesh(mesh: &MeshData, selected_polys: &HashSet<PolyIndex>) {
+    let unselected_color = GRAY;
+    let selected_color = Color::new(0.5, 0.15, 0.15, 1.0);
+    let mesh = mesh_data_to_macro_mesh(mesh, unselected_color);
     draw_mesh(&mesh);
 }
 

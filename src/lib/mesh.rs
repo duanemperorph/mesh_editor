@@ -342,9 +342,7 @@ impl Mesh {
             .collect()
     }
 
-    pub fn lines_in_vertex_indicies(&self, indicies: Vec<VertIndex>) -> Vec<LineIndex> {
-        let index_set: HashSet<VertIndex> = indicies.iter().copied().collect();
-
+    pub fn lines_in_vertex_indicies(&self, index_set: &HashSet<VertIndex>) -> HashSet<LineIndex> {
         self.lines
             .iter()
             .enumerate()
@@ -353,15 +351,13 @@ impl Mesh {
             .collect()
     }
 
-    pub fn polys_in_vertex_indicies(&self, indicies: Vec<VertIndex>) -> Vec<PolyIndex> {
-        let index_set: HashSet<VertIndex> = indicies.iter().copied().collect();
-
+    pub fn polys_in_vertex_indicies(&self, index_set: &HashSet<VertIndex>) -> HashSet<PolyIndex> {
         self.polys
             .iter()
             .enumerate()
-            .filter(|(_, poly)| {
-                let matching_indicies_count = poly.iter().filter(|i| index_set.contains(i)).count();
-                return matching_indicies_count == poly.len();
+            .filter(|(_, p)| {
+                let count = p.iter().filter(|i| index_set.contains(i)).count();
+                count == p.len()
             })
             .map(|(i, _)| i)
             .collect()
@@ -369,17 +365,14 @@ impl Mesh {
 
     pub fn polys_partially_in_vertex_indicies(
         &self,
-        indicies: Vec<VertIndex>,
-        min_matching_verts: usize,
+        index_set: &HashSet<VertIndex>,
     ) -> Vec<PolyIndex> {
-        let index_set: HashSet<VertIndex> = indicies.iter().copied().collect();
-
         self.polys
             .iter()
             .enumerate()
-            .filter(|(_, poly)| {
-                let matching_indicies_count = poly.iter().filter(|i| index_set.contains(i)).count();
-                return matching_indicies_count >= min_matching_verts;
+            .filter(|(_, p)| {
+                let count = p.iter().filter(|i| index_set.contains(i)).count();
+                count >= 3 // at least 3 points bordering the poly
             })
             .map(|(i, _)| i)
             .collect()

@@ -4,6 +4,7 @@
 
 use crate::editor_state::*;
 use crate::insert_preview_state::*;
+use crate::selection::Selection;
 use macroquad::prelude::*;
 use mesh_editor::mesh::{Mesh as MeshData, *};
 
@@ -48,15 +49,13 @@ fn format_input_mode(input_mode: &InputMode) -> String {
 }
 
 fn format_selection(selection: &Selection, mesh: &MeshData) -> String {
-    match selection {
-        Selection::None => format!("Sel: None"),
-        Selection::Verticies(verts) if verts.len() == 1 => {
-            let vert = mesh.verts()[0];
-            format!("Sel: {}", vert)
-        }
-        Selection::Verticies(verts) => format!("Sel: Verts ({})", verts.len()),
-        Selection::Lines(lines) => format!("Sel: Lines ({})", lines.len()),
-        Selection::Polys(polys) => format!("Sel: Polys ({})", polys.len()),
+    let verts = selection.selected_vert_indicies();
+
+    if verts.len() == 1 {
+        let vert = mesh.verts()[0];
+        format!("Sel: {}", vert)
+    } else {
+        format!("Sel: Verts ({})", verts.len())
     }
 }
 

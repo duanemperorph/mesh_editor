@@ -5,9 +5,8 @@ use crate::editor_panel_state::*;
 use crate::editor_state::*;
 use crate::panes::*;
 use crate::screen_to_world::*;
-use crate::viewer_selection::*;
 use macroquad::prelude::*;
-use mesh_editor::mesh::Mesh as MeshData;
+use mesh_editor::mesh::{Mesh as MeshData, *};
 use std::f32::consts::PI;
 
 enum SelectedPanel<'a> {
@@ -37,7 +36,14 @@ pub fn handle_viewer_commands<'a>(
         } else if is_mouse_button_pressed(MouseButton::Middle) {
             handle_reset_pan(panel);
         } else if is_mouse_button_pressed(MouseButton::Left) {
-            select_point_under_mouse(current_mouse_coords, mesh, panel, viewport);
+            let panel = *panel;
+            if let Some(index) =
+                get_vert_index_under_mouse(current_mouse_coords, mesh, &panel, viewport)
+            {
+                editor_state
+                    .selection_mut()
+                    .toggle_selected_vert_index(index);
+            }
         }
         handle_mouse_wheel_2d(panel);
     } else if let SelectedPanel::PanelFreeCam(panel) = panel {
@@ -115,4 +121,30 @@ pub fn rotation_from_mouse_delta(mouse_delta: Vec2, viewport: Rect) -> Vec2 {
     let rot_x = -mouse_delta.x / screen_width_fraction * PI;
     let rot_y = -mouse_delta.y / screen_height_fraction * PI / 2.0;
     return vec2(rot_x, rot_y);
+}
+
+fn get_vert_index_under_mouse(
+    mouse_coord: Vec2,
+    mesh: &MeshData,
+    panel: &PanelState2D,
+    viewport: Rect,
+) -> Option<VertIndex> {
+    let world_coord = mouse_coord_to_world_coord_vec2(mouse_coord, &panel, viewport);
+    println!("world_coord: {world_coord}");
+    let found_verts = get_verts_from_mesh_near_coord(world_coord, panel.viewing_plane(), mesh);
+    found_verts.get(0).copied()
+}
+
+fn get_verts_from_mesh_near_coord(
+    world_coord: Vec2,
+    viewing_plane: PanelViewingPlane,
+    mesh: &MeshData,
+) -> Vec<VertIndex> {
+    let search_radius = 0.1;
+
+    match viewing_plane {
+        PanelViewingPlane::XY => mesh.find_verts_xy(world_coord, search_radius),
+        PanelViewingPlane::XZ => mesh.find_verts_xz(world_coord, search_radius),
+        PanelViewingPlane::YZ => mesh.find_verts_yz(world_coord.yx(), search_radius),
+    }
 }
