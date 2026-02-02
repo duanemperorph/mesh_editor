@@ -40,29 +40,35 @@ pub fn handle_mouse_commands<'a>(
             let panel_mut = editor_state_mut.panel_state_2d_from_plane_mut(viewing_plane);
             handle_reset_pan(panel_mut);
         } else if is_mouse_button_pressed(MouseButton::Left) {
-            let panel = editor_state_mut.panel_state_2d_from_plane(viewing_plane);
-            // let panel = *panel;
-            if let Some(index) =
-                get_vert_index_under_mouse(current_mouse_coords, mesh, &panel, viewport)
-            {
-                let mod_keys = check_modifier_keys();
-                let selection_mut = editor_state_mut.selection_mut();
-
-                if mod_keys.shift_key {
-                    if selection_mut.selected_vert_indicies().len() == 1 {
-                        let start_index = *selection_mut
-                            .selected_vert_indicies()
-                            .iter()
-                            .next()
-                            .unwrap();
-                        let verts_between = mesh.find_verts_between(start_index, index);
-                        selection_mut.replace_selected_vert_indicies(&verts_between);
-                    }
-                } else if mod_keys.meta_key {
-                    selection_mut.toggle_selected_vert_index(index);
-                } else {
-                    selection_mut.replace_selected_vert_indicies(&[index]);
-                }
+            match editor_state_mut.input_mode() {
+                InputMode::Select => handle_left_click_selection(
+                    current_mouse_coords,
+                    editor_state_mut,
+                    mesh,
+                    viewing_plane,
+                    viewport,
+                ),
+                InputMode::Insert => handle_left_click_insert(
+                    current_mouse_coords,
+                    editor_state_mut,
+                    mesh,
+                    viewing_plane,
+                    viewport,
+                ),
+                InputMode::Connect => handle_left_click_connect(
+                    current_mouse_coords,
+                    editor_state_mut,
+                    mesh,
+                    viewing_plane,
+                    viewport,
+                ),
+                InputMode::Groups => handle_left_click_groups(
+                    current_mouse_coords,
+                    editor_state_mut,
+                    mesh,
+                    viewing_plane,
+                    viewport,
+                ),
             }
         }
         let panel_mut = editor_state_mut.panel_state_2d_from_plane_mut(viewing_plane);
@@ -77,6 +83,65 @@ pub fn handle_mouse_commands<'a>(
         }
         handle_mouse_wheel_free_cam(free_cam_panel_mut);
     }
+}
+
+fn handle_left_click_selection(
+    current_mouse_coords: Vec2,
+    editor_state_mut: &mut EditorState,
+    mesh: &MeshData,
+    viewing_plane: PanelViewingPlane,
+    viewport: Rect,
+) {
+    let panel = editor_state_mut.panel_state_2d_from_plane(viewing_plane);
+    if let Some(index) = get_vert_index_under_mouse(current_mouse_coords, mesh, &panel, viewport) {
+        let mod_keys = check_modifier_keys();
+        let selection_mut = editor_state_mut.selection_mut();
+
+        if mod_keys.shift_key {
+            if let Some(&start_index) = selection_mut.selected_vert_indicies().first() {
+                let verts_between = mesh.find_verts_between(start_index, index);
+                selection_mut.replace_selected_vert_indicies(&verts_between);
+            }
+        } else if mod_keys.meta_key {
+            selection_mut.toggle_selected_vert_index(index);
+        } else {
+            selection_mut.replace_selected_vert_indicies(&[index]);
+        }
+    }
+}
+
+fn handle_left_click_insert(
+    mouse_coord: Vec2,
+    editor_state_mut: &mut EditorState,
+    mesh: &MeshData,
+    viewing_plane: PanelViewingPlane,
+    viewport: Rect,
+) {
+    let panel = editor_state_mut.panel_state_2d_from_plane(viewing_plane);
+    let world_coord = mouse_coord_to_world_coord_vec2(mouse_coord, &panel, viewport);
+    let selected_vert_index = editor_state_mut.selection().
+    let selected_verts = mesh.selected_indicies_to_verts(editor_state_mut.selection().selected_vert_indicies());
+    let origin = if let Some(selected_vert_origin) = selected_points.first() { selected_vert_orign } else { vec3(0, 0, 0) };
+}
+
+fn handle_left_click_connect(
+    current_mouse_coords: Vec2,
+    editor_state_mut: &mut EditorState,
+    mesh: &MeshData,
+    viewing_plane: PanelViewingPlane,
+    viewport: Rect,
+) {
+    //todo: this
+}
+
+fn handle_left_click_groups(
+    current_mouse_coords: Vec2,
+    editor_state_mut: &mut EditorState,
+    mesh: &MeshData,
+    viewing_plane: PanelViewingPlane,
+    viewport: Rect,
+) {
+    //TODO: THIS
 }
 
 fn handle_mouse_pan(panel: &mut PanelState2D, viewport: Rect) {
@@ -159,7 +224,12 @@ fn get_vert_index_under_mouse(
 
     // println!("world_coord: {world_coord}");
     let found_verts = get_verts_from_mesh_near_coord(world_coord, panel.viewing_plane(), mesh);
-    found_verts.get(0).copied()
+
+    if panel.is_flipped() {
+        found_verts.first().copied()
+    } else {
+        found_verts.last().copied()
+    }
 }
 
 fn get_verts_from_mesh_near_coord(

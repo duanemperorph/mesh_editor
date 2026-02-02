@@ -22,12 +22,12 @@ pub fn handle_keyboard_commands(editor_state: &mut EditorState, mesh: &mut MeshD
         editor_state.set_input_mode(InputMode::Groups);
     }
     if is_key_pressed(KeyCode::X) {
-        let selected_verts = editor_state.selection().selected_vert_indicies();
-        let polys = mesh.polys_partially_in_vertex_indicies(selected_verts);
+        let selected_verts = editor_state.selection().selected_vert_indicies_set();
+        let polys = mesh.polys_partially_in_vertex_indicies(&selected_verts);
         let verts_from_polys = mesh.vert_indicies_from_poly_indicies(polys);
         editor_state
             .selection_mut()
-            .replace_selected_vert_indicies_set(verts_from_polys);
+            .replace_selected_vert_indicies(&verts_from_polys);
     }
     if is_key_pressed(KeyCode::Escape) {
         editor_state.selection_mut().clear()

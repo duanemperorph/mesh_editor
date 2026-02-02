@@ -102,6 +102,16 @@ impl Mesh {
         return Some(self.polys.swap_remove(index));
     }
 
+    pub fn selected_indicies_to_verts(&self, indicies: HashSet<VertIndex>) -> Vec<Vec3> {
+        self.verticies
+            .iter()
+            .enumerate()
+            .filter(|(i, _)| indicies.contains(i))
+            .map(|(i, v)| v)
+            .copied()
+            .collect()
+    }
+
     pub fn lines_to_vert_pairs(&self) -> Vec<(Vec3, Vec3)> {
         return self
             .lines
@@ -396,7 +406,7 @@ impl Mesh {
     pub fn vert_indicies_from_poly_indicies(
         &self,
         poly_indicies: HashSet<PolyIndex>,
-    ) -> HashSet<VertIndex> {
+    ) -> Vec<VertIndex> {
         poly_indicies
             .iter()
             .filter_map(|&i| self.polys.get(i))
