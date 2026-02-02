@@ -3,7 +3,7 @@
 //
 
 use crate::editor_state::*;
-use crate::insert_preview_state::*;
+use crate::insert_operation::*;
 use crate::selection::Selection;
 use macroquad::prelude::*;
 use mesh_editor::mesh::{Mesh as MeshData, *};
@@ -26,8 +26,17 @@ pub fn draw_status_text(editor_state: &EditorState, mesh: &MeshData) {
     let input_mode_desc = format_input_mode(editor_state.input_mode());
     draw_text(&input_mode_desc, x_offset_0, y_offset, TEXT_HEIGHT, WHITE);
 
-    if let Some(_) = editor_state.insert_preview().vert() {
-        let insert_preview_desc = format_insert(editor_state.insert_preview());
+    if let InsertOperation::Vert(vert_op) = editor_state.pending_insert_operation() {
+        let insert_preview_desc = format!("Vert: {}", vert_op.new_vert);
+        draw_text(
+            &insert_preview_desc,
+            x_offset_1,
+            y_offset,
+            TEXT_HEIGHT,
+            WHITE,
+        );
+    } else if let InsertOperation::Line(_) = editor_state.pending_insert_operation() {
+        let insert_preview_desc = "Ins: Line";
         draw_text(
             &insert_preview_desc,
             x_offset_1,
@@ -57,13 +66,6 @@ fn format_selection(selection: &Selection, mesh: &MeshData) -> String {
     } else {
         format!("Sel: Verts ({})", verts.len())
     }
-}
-
-fn format_insert(insert_preview: &InsertPreview) -> String {
-    let Some(vert) = insert_preview.vert() else {
-        return String::from("");
-    };
-    format!("Ins: {}", vert)
 }
 
 fn format_mirror(mesh: &MeshData) -> String {

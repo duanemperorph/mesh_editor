@@ -1,7 +1,7 @@
 //
 // keyboard_commands -> handle keyboard commands
 //
-use crate::editor_state::EditorState;
+use crate::editor_state::*;
 use macroquad::prelude::*;
 use mesh_editor::mesh::Mesh as MeshData;
 
@@ -9,8 +9,17 @@ pub fn handle_keyboard_commands(editor_state: &mut EditorState, mesh: &mut MeshD
     if is_key_pressed(KeyCode::Tab) {
         editor_state.toggle_viewer_mode();
     }
-    if is_key_pressed(KeyCode::Space) {
-        editor_state.toggle_input_mode();
+    if is_key_pressed(KeyCode::F1) {
+        editor_state.set_input_mode(InputMode::Select);
+    }
+    if is_key_pressed(KeyCode::F2) {
+        editor_state.set_input_mode(InputMode::Insert);
+    }
+    if is_key_pressed(KeyCode::F3) {
+        editor_state.set_input_mode(InputMode::Connect);
+    }
+    if is_key_pressed(KeyCode::F4) {
+        editor_state.set_input_mode(InputMode::Groups);
     }
     if is_key_pressed(KeyCode::X) {
         let selected_verts = editor_state.selection().selected_vert_indicies();

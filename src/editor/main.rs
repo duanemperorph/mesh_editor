@@ -10,7 +10,7 @@ use editor_state::*;
 
 mod editor_panel_state;
 
-mod insert_preview_state;
+mod insert_operation;
 
 mod status_bar;
 use status_bar::*;

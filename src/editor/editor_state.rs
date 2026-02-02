@@ -3,7 +3,7 @@
 //
 
 use crate::editor_panel_state::*;
-use crate::insert_preview_state::*;
+use crate::insert_operation::*;
 use crate::selection::*;
 use mesh_editor::mesh::{LineIndex, PolyIndex, VertIndex};
 use strum::Display;
@@ -12,6 +12,8 @@ use strum::Display;
 pub enum InputMode {
     Select,
     Insert,
+    Connect,
+    Groups,
 }
 
 #[derive(PartialEq)]
@@ -27,7 +29,7 @@ pub struct EditorState {
     panel_state_yz: PanelState2D,
     panel_state_xy: PanelState2D,
     panel_state_free_cam: PanelStateFreeCam,
-    insert_preview: InsertPreview,
+    pending_insert_operation: InsertOperation,
     viewer_mode: ViewerMode,
 }
 
@@ -45,7 +47,7 @@ impl EditorState {
             panel_state_xy: PanelState2D::new(PanelViewingPlane::XY),
             panel_state_free_cam: PanelStateFreeCam::new(),
             viewer_mode: ViewerMode::EditorPanels,
-            insert_preview: InsertPreview::new(),
+            pending_insert_operation: InsertOperation::None,
         }
     }
 
@@ -61,11 +63,8 @@ impl EditorState {
         &self.input_mode
     }
 
-    pub fn toggle_input_mode(&mut self) {
-        self.input_mode = match self.input_mode {
-            InputMode::Select => InputMode::Insert,
-            InputMode::Insert => InputMode::Select,
-        }
+    pub fn set_input_mode(&mut self, new_mode: InputMode) {
+        self.input_mode = new_mode;
     }
 
     pub fn panel_state_xz(&self) -> &PanelState2D {
@@ -119,8 +118,8 @@ impl EditorState {
         &mut self.panel_state_free_cam
     }
 
-    pub fn insert_preview(&self) -> &InsertPreview {
-        &self.insert_preview
+    pub fn pending_insert_operation(&self) -> &InsertOperation {
+        &self.pending_insert_operation
     }
 
     pub fn viewer_mode(&self) -> &ViewerMode {
