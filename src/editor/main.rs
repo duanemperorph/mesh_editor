@@ -12,8 +12,8 @@ mod editor_panel_state;
 
 mod insert_preview_state;
 
-mod status_text;
-use status_text::*;
+mod status_bar;
+use status_bar::*;
 
 mod panes;
 use panes::*;
@@ -32,6 +32,9 @@ mod selection;
 
 mod keyboard_commands;
 use keyboard_commands::*;
+
+mod panel_ui_controls;
+use panel_ui_controls::*;
 
 #[macroquad::main("Mesh Editor")]
 async fn main() {
@@ -79,6 +82,7 @@ async fn main() {
         } else {
             panes.draw_bottom_border();
         }
+        add_panel_ui_controls(&mut editor_state, &panes);
         draw_status_text(&editor_state, &current_mesh);
 
         next_frame().await

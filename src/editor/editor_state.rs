@@ -103,6 +103,18 @@ impl EditorState {
         }
     }
 
+    pub fn panel_state_xz_mut(&mut self) -> &mut PanelState2D {
+        &mut self.panel_state_xz
+    }
+
+    pub fn panel_state_yz_mut(&mut self) -> &mut PanelState2D {
+        &mut self.panel_state_yz
+    }
+
+    pub fn panel_state_xy_mut(&mut self) -> &mut PanelState2D {
+        &mut self.panel_state_xy
+    }
+
     pub fn panel_state_free_cam_mut(&mut self) -> &mut PanelStateFreeCam {
         &mut self.panel_state_free_cam
     }

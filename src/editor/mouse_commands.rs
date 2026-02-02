@@ -80,7 +80,12 @@ pub fn handle_mouse_commands<'a>(
 }
 
 fn handle_mouse_pan(panel: &mut PanelState2D, viewport: Rect) {
-    let mouse_delta = mouse_delta_position();
+    let mut mouse_delta = mouse_delta_position();
+
+    if panel.is_flipped() {
+        mouse_delta.x = -mouse_delta.x;
+    }
+
     let pan_delta = mouse_delta_to_world_scale_vec2(mouse_delta, panel, viewport);
     *panel.pan_mut() += pan_delta;
 }
@@ -151,7 +156,8 @@ fn get_vert_index_under_mouse(
     viewport: Rect,
 ) -> Option<VertIndex> {
     let world_coord = mouse_coord_to_world_coord_vec2(mouse_coord, &panel, viewport);
-    println!("world_coord: {world_coord}");
+
+    // println!("world_coord: {world_coord}");
     let found_verts = get_verts_from_mesh_near_coord(world_coord, panel.viewing_plane(), mesh);
     found_verts.get(0).copied()
 }

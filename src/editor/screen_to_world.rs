@@ -39,7 +39,9 @@ pub fn mouse_coord_to_world_coord_vec2(
     let norm_x = (mouse_coords.x - viewport.x) / viewport.w - 0.5;
     let norm_y = (mouse_coords.y - viewport.y) / viewport.h - 0.5;
 
-    let world_x = -norm_x * fovy * aspect + panel.pan().x;
+    let flipped_mult = if panel.is_flipped() { 1.0 } else { -1.0 };
+
+    let world_x = flipped_mult * norm_x * fovy * aspect + panel.pan().x;
     let world_y = -norm_y * fovy + panel.pan().y; // Negative because screen Y is inverted
 
     vec2(world_x, world_y)
