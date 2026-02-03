@@ -11,7 +11,6 @@ use strum::Display;
 #[derive(Display)]
 pub enum InputMode {
     Select,
-    Edit,
     Insert,
     Connect,
     Groups,

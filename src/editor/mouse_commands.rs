@@ -70,13 +70,6 @@ pub fn handle_mouse_commands<'a>(
                     viewing_plane,
                     viewport,
                 ),
-                InputMode::Edit => handle_left_click_edit(
-                    current_mouse_coords,
-                    editor_state_mut,
-                    mesh,
-                    viewing_plane,
-                    viewport,
-                ),
             }
         }
         let panel_mut = editor_state_mut.panel_state_2d_from_plane_mut(viewing_plane);
@@ -116,16 +109,6 @@ fn handle_left_click_selection(
             selection_mut.replace_selected_vert_indicies(&[index]);
         }
     }
-}
-
-fn handle_left_click_edit(
-    current_mouse_coords: Vec2,
-    editor_state_mut: &mut EditorState,
-    mesh: &MeshData,
-    viewing_plane: PanelViewingPlane,
-    viewport: Rect,
-) {
-    //TODO: THIS
 }
 
 fn handle_left_click_insert(

@@ -14,15 +14,12 @@ pub fn handle_keyboard_commands(editor_state: &mut EditorState, mesh: &mut MeshD
         editor_state.set_input_mode(InputMode::Select);
     }
     if is_key_pressed(KeyCode::F2) {
-        editor_state.set_input_mode(InputMode::Edit);
-    }
-    if is_key_pressed(KeyCode::F3) {
         editor_state.set_input_mode(InputMode::Insert);
     }
-    if is_key_pressed(KeyCode::F4) {
+    if is_key_pressed(KeyCode::F3) {
         editor_state.set_input_mode(InputMode::Connect);
     }
-    if is_key_pressed(KeyCode::F5) {
+    if is_key_pressed(KeyCode::F4) {
         editor_state.set_input_mode(InputMode::Groups);
     }
     if is_key_pressed(KeyCode::X) {
