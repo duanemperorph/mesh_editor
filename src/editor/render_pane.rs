@@ -3,6 +3,7 @@
 //
 
 use crate::editor_panel_state::*;
+use crate::insert_operation::*;
 use crate::panes::Viewport;
 use crate::selection::Selection;
 use macroquad::prelude::{Mesh as MacroMesh, *};
@@ -52,7 +53,7 @@ pub fn render_editor_pane_viewport(
     render_mesh(mesh);
 
     if (selected_polys.len() > 0) {
-        render_mesh_selected_polys(mesh, &selected_polys)
+        render_mesh_selected_polys(mesh, &selected_polys);
     }
 
     render_lines(mesh, &selected_lines);
@@ -105,6 +106,21 @@ fn render_mesh_selected_polys(mesh: &MeshData, selected_polys: &HashSet<PolyInde
     let selected_color = Color::new(0.5, 0.35, 0.35, 1.0);
     let mesh = selected_polys_to_macro_mesh(mesh, selected_polys, selected_color);
     draw_mesh(&mesh);
+}
+
+fn render_insert_operation(operation: InsertOperation, mesh: &MeshData) {
+    if let InsertOperation::Vert(insert_vert_op) = operation {
+        let preview_color = Color::new(0.0, 0.5, 0.5, 1.0);
+        let sphere_radius = 0.05;
+
+        draw_sphere(insert_vert_op.new_vert, sphere_radius, None, preview_color);
+
+        if let Some(origin_vert_index) = insert_vert_op.origin_vert_index
+            && let Some(&origin_vert) = mesh.verts().get(origin_vert_index)
+        {
+            draw_line_3d(origin_vert, insert_vert_op.new_vert, preview_color);
+        }
+    }
 }
 
 fn mesh_data_to_macro_mesh(mesh_data: &MeshData, color: Color) -> MacroMesh {

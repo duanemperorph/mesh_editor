@@ -3,6 +3,7 @@
 //
 use crate::editor_panel_state::*;
 use crate::editor_state::*;
+use crate::insert_operation::*;
 use crate::keyboard::check_modifier_keys;
 use crate::panes::*;
 use crate::screen_to_world::*;
@@ -69,6 +70,13 @@ pub fn handle_mouse_commands<'a>(
                     viewing_plane,
                     viewport,
                 ),
+                InputMode::Edit => handle_left_click_edit(
+                    current_mouse_coords,
+                    editor_state_mut,
+                    mesh,
+                    viewing_plane,
+                    viewport,
+                ),
             }
         }
         let panel_mut = editor_state_mut.panel_state_2d_from_plane_mut(viewing_plane);
@@ -110,6 +118,16 @@ fn handle_left_click_selection(
     }
 }
 
+fn handle_left_click_edit(
+    current_mouse_coords: Vec2,
+    editor_state_mut: &mut EditorState,
+    mesh: &MeshData,
+    viewing_plane: PanelViewingPlane,
+    viewport: Rect,
+) {
+    //TODO: THIS
+}
+
 fn handle_left_click_insert(
     mouse_coord: Vec2,
     editor_state_mut: &mut EditorState,
@@ -119,9 +137,24 @@ fn handle_left_click_insert(
 ) {
     let panel = editor_state_mut.panel_state_2d_from_plane(viewing_plane);
     let world_coord = mouse_coord_to_world_coord_vec2(mouse_coord, &panel, viewport);
-    let selected_vert_index = editor_state_mut.selection().
-    let selected_verts = mesh.selected_indicies_to_verts(editor_state_mut.selection().selected_vert_indicies());
-    let origin = if let Some(selected_vert_origin) = selected_points.first() { selected_vert_orign } else { vec3(0, 0, 0) };
+
+    let (start_vert_index, start_origin) = if let Some(&selected_index) =
+        editor_state_mut.selection().selected_vert_indicies().last()
+        && let Some(&selected_vert) = mesh.verts().get(selected_index)
+    {
+        (Some(selected_index), selected_vert)
+    } else {
+        (None, Vec3::ZERO)
+    };
+
+    let new_vert = match viewing_plane {
+        PanelViewingPlane::XY => vec3(world_coord.x, world_coord.y, start_origin.z),
+        PanelViewingPlane::XZ => vec3(world_coord.x, start_origin.y, world_coord.y),
+        PanelViewingPlane::YZ => vec3(start_origin.x, world_coord.y, world_coord.x),
+    };
+
+    let op = InsertVertOperation::new(new_vert, start_vert_index);
+    editor_state_mut.set_pending_insert_operation(InsertOperation::Vert(op));
 }
 
 fn handle_left_click_connect(
@@ -131,7 +164,22 @@ fn handle_left_click_connect(
     viewing_plane: PanelViewingPlane,
     viewport: Rect,
 ) {
-    //todo: this
+    let panel = editor_state_mut.panel_state_2d_from_plane(viewing_plane);
+    let mod_keys = check_modifier_keys();
+
+    let Some(clicked_index) =
+        get_vert_index_under_mouse(current_mouse_coords, mesh, &panel, viewport)
+    else {
+        return;
+    };
+
+    let Some(&selected_index) = editor_state_mut.selection().selected_vert_indicies().last() else {
+        return;
+    };
+
+    let completes_poly = !mod_keys.alt_key;
+    let op = InsertLineOperation::new((clicked_index, selected_index), completes_poly);
+    editor_state_mut.set_pending_insert_operation(InsertOperation::Line(op));
 }
 
 fn handle_left_click_groups(

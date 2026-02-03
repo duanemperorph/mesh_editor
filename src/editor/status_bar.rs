@@ -26,7 +26,7 @@ pub fn draw_status_text(editor_state: &EditorState, mesh: &MeshData) {
     let input_mode_desc = format_input_mode(editor_state.input_mode());
     draw_text(&input_mode_desc, x_offset_0, y_offset, TEXT_HEIGHT, WHITE);
 
-    if let InsertOperation::Vert(vert_op) = editor_state.pending_insert_operation() {
+    if let Some(InsertOperation::Vert(vert_op)) = editor_state.pending_insert_operation() {
         let insert_preview_desc = format!("Vert: {}", vert_op.new_vert);
         draw_text(
             &insert_preview_desc,
@@ -35,7 +35,7 @@ pub fn draw_status_text(editor_state: &EditorState, mesh: &MeshData) {
             TEXT_HEIGHT,
             WHITE,
         );
-    } else if let InsertOperation::Line(_) = editor_state.pending_insert_operation() {
+    } else if let Some(InsertOperation::Line(_)) = editor_state.pending_insert_operation() {
         let insert_preview_desc = "Ins: Line";
         draw_text(
             &insert_preview_desc,

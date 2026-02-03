@@ -11,6 +11,7 @@ use strum::Display;
 #[derive(Display)]
 pub enum InputMode {
     Select,
+    Edit,
     Insert,
     Connect,
     Groups,
@@ -29,7 +30,7 @@ pub struct EditorState {
     panel_state_yz: PanelState2D,
     panel_state_xy: PanelState2D,
     panel_state_free_cam: PanelStateFreeCam,
-    pending_insert_operation: InsertOperation,
+    pending_insert_operation: Option<InsertOperation>,
     viewer_mode: ViewerMode,
 }
 
@@ -47,7 +48,7 @@ impl EditorState {
             panel_state_xy: PanelState2D::new(PanelViewingPlane::XY),
             panel_state_free_cam: PanelStateFreeCam::new(),
             viewer_mode: ViewerMode::EditorPanels,
-            pending_insert_operation: InsertOperation::None,
+            pending_insert_operation: None,
         }
     }
 
@@ -118,8 +119,16 @@ impl EditorState {
         &mut self.panel_state_free_cam
     }
 
-    pub fn pending_insert_operation(&self) -> &InsertOperation {
-        &self.pending_insert_operation
+    pub fn pending_insert_operation(&self) -> Option<InsertOperation> {
+        self.pending_insert_operation
+    }
+
+    pub fn set_pending_insert_operation(&mut self, new_op: InsertOperation) {
+        self.pending_insert_operation = Some(new_op);
+    }
+
+    pub fn clear_pending_insert_operation(&mut self) {
+        self.pending_insert_operation = None
     }
 
     pub fn viewer_mode(&self) -> &ViewerMode {
