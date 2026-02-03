@@ -22,12 +22,6 @@ pub enum InsertOperation {
     Line(InsertLineOperation),
 }
 
-pub struct InsertOperationResult {
-    new_vert: Option<Vec3>,
-    new_line: Option<(Vec3, Vec3)>,
-    new_poly: Option<Poly>,
-}
-
 impl InsertVertOperation {
     pub fn new(new_vert: Vec3, origin_vert_index: Option<VertIndex>) -> InsertVertOperation {
         InsertVertOperation {
@@ -44,12 +38,13 @@ impl InsertLineOperation {
             completes_poly,
         }
     }
-}
 
-impl InsertOperation {
-    //todo: this
-}
+    pub fn get_constructed_poly(&self, mesh: &MeshData) -> Option<Poly> {
+        let verts_between = mesh.find_verts_between(self.new_line.0, self.new_line.1);
 
-impl InsertOperationResult {
-    //todo: this
+        if verts_between.len() >= 3 {
+            return Some(verts_between);
+        }
+        None
+    }
 }

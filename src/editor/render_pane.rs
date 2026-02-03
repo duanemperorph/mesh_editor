@@ -120,6 +120,20 @@ fn render_insert_operation(operation: InsertOperation, mesh: &MeshData) {
         {
             draw_line_3d(origin_vert, insert_vert_op.new_vert, preview_color);
         }
+    } else if let InsertOperation::Line(insert_line_op) = operation {
+        let preview_color = Color::new(0.0, 0.5, 0.5, 1.0);
+
+        if let Some(&v1) = mesh.verts().get(insert_line_op.new_line.0)
+            && let Some(&v2) = mesh.verts().get(insert_line_op.new_line.1)
+        {
+            draw_line_3d(v1, v2, preview_color);
+
+            if let Some(poly) = insert_line_op.get_constructed_poly(mesh) {
+                let poly_color = Color::new(0.0, 0.5, 0.5, 0.5);
+                let poly_mesh = poly_to_macro_mesh(mesh, &poly, poly_color);
+                draw_mesh(&poly_mesh);
+            }
+        }
     }
 }
 
@@ -166,6 +180,30 @@ fn selected_polys_to_macro_mesh(
 
     let indices = mesh_data
         .selected_polys_to_triangle_indicies(selected_polys)
+        .iter()
+        .map(|index| *index as u16)
+        .collect();
+
+    MacroMesh {
+        vertices,
+        indices,
+        texture: None,
+    }
+}
+
+fn poly_to_macro_mesh(mesh_data: &MeshData, poly: &Poly, color: Color) -> MacroMesh {
+    let vertices = mesh_data
+        .verts()
+        .iter()
+        .map(|v| Vertex {
+            position: *v,
+            uv: Vec2::ZERO,
+            color: color.into(),
+            normal: Vec4::ZERO,
+        })
+        .collect();
+
+    let indices = MeshData::poly_indicies_to_triangle_indicies(poly)
         .iter()
         .map(|index| *index as u16)
         .collect();
