@@ -1,7 +1,7 @@
 //
 // mesh_bfs -> use bfs to find the closest route between 2 points
 //
-use crate::mesh_types::*;
+use super::{Line, VertIndex};
 use std::collections::{HashMap, HashSet};
 
 pub fn mesh_bfs(start_index: VertIndex, target_index: VertIndex, lines: &[Line]) -> Vec<VertIndex> {
