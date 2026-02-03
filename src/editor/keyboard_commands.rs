@@ -35,4 +35,5 @@ pub fn handle_keyboard_commands(editor_state: &mut EditorState, mesh: &mut MeshD
     if is_key_pressed(KeyCode::Escape) {
         editor_state.selection_mut().clear()
     }
+    if is_key_pressed(KeyCode::Space) {}
 }

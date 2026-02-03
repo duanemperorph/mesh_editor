@@ -65,6 +65,7 @@ impl EditorState {
     }
 
     pub fn set_input_mode(&mut self, new_mode: InputMode) {
+        self.pending_insert_operation = None;
         self.input_mode = new_mode;
     }
 

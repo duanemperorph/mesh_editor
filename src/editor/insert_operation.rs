@@ -29,6 +29,15 @@ impl InsertVertOperation {
             origin_vert_index,
         }
     }
+
+    pub fn apply(&self, mesh: &mut MeshData) {
+        mesh.add_vert(self.new_vert);
+
+        if let Some(origin_vert_index) = self.origin_vert_index {
+            let new_vert_index = mesh.verts().len() - 1;
+            mesh.add_line((origin_vert_index, new_vert_index));
+        }
+    }
 }
 
 impl InsertLineOperation {
@@ -46,5 +55,15 @@ impl InsertLineOperation {
             return Some(verts_between);
         }
         None
+    }
+
+    pub fn apply(&self, mesh: &mut MeshData) {
+        mesh.add_line(self.new_line);
+
+        if self.completes_poly
+            && let Some(new_poly) = self.get_constructed_poly(mesh)
+        {
+            mesh.add_poly(new_poly);
+        }
     }
 }
