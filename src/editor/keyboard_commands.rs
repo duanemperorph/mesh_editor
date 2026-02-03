@@ -2,6 +2,7 @@
 // keyboard_commands -> handle keyboard commands
 //
 use crate::editor_state::*;
+use crate::insert_operation::*;
 use macroquad::prelude::*;
 use mesh_editor::mesh::Mesh as MeshData;
 
@@ -35,5 +36,19 @@ pub fn handle_keyboard_commands(editor_state: &mut EditorState, mesh: &mut MeshD
     if is_key_pressed(KeyCode::Escape) {
         editor_state.selection_mut().clear()
     }
-    if is_key_pressed(KeyCode::Space) {}
+    if is_key_pressed(KeyCode::Space) {
+        if let Some(insert_op) = editor_state.pending_insert_operation() {
+            if let InsertOperation::Vert(insert_vert_op) = insert_op {
+                insert_vert_op.apply(mesh);
+                let new_vert_index = mesh.verts().len() - 1;
+                // add new point to the selection
+                editor_state
+                    .selection_mut()
+                    .add_selected_vert_indicies(&[new_vert_index]);
+            } else if let InsertOperation::Line(insert_line_op) = insert_op {
+                insert_line_op.apply(mesh);
+            }
+        }
+        editor_state.clear_pending_insert_operation();
+    }
 }
