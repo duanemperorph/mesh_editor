@@ -286,6 +286,12 @@ impl Mesh {
     ) -> Vec<VertIndex> {
         mesh_bfs(start_index, end_index, &self.lines)
     }
+
+    pub fn clear(&mut self) {
+        self.verticies = Vec::new();
+        self.lines = Vec::new();
+        self.polys = Vec::new();
+    }
 }
 
 //
