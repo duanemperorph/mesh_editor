@@ -5,7 +5,7 @@
 use crate::editor_panel_state::*;
 use crate::insert_operation::*;
 use crate::selection::*;
-use mesh_editor::mesh::{LineIndex, PolyIndex, VertIndex};
+use mesh_editor::mesh::Axis;
 use strum::Display;
 
 #[derive(Display)]
@@ -31,6 +31,7 @@ pub struct EditorState {
     panel_state_free_cam: PanelStateFreeCam,
     pending_insert_operation: Option<InsertOperation>,
     viewer_mode: ViewerMode,
+    selected_axis: Axis,
 }
 
 //
@@ -48,6 +49,7 @@ impl EditorState {
             panel_state_free_cam: PanelStateFreeCam::new(),
             viewer_mode: ViewerMode::EditorPanels,
             pending_insert_operation: None,
+            selected_axis: Axis::X,
         }
     }
 
@@ -123,6 +125,10 @@ impl EditorState {
         self.pending_insert_operation
     }
 
+    pub fn pending_insert_operation_mut(&mut self) -> Option<&mut InsertOperation> {
+        self.pending_insert_operation.as_mut()
+    }
+
     pub fn set_pending_insert_operation(&mut self, new_op: InsertOperation) {
         self.pending_insert_operation = Some(new_op);
     }
@@ -140,5 +146,13 @@ impl EditorState {
             ViewerMode::EditorPanels => self.viewer_mode = ViewerMode::FreeCam,
             ViewerMode::FreeCam => self.viewer_mode = ViewerMode::EditorPanels,
         }
+    }
+
+    pub fn selected_axis(&self) -> Axis {
+        self.selected_axis
+    }
+
+    pub fn set_selected_axis(&mut self, new_axis: Axis) {
+        self.selected_axis = new_axis;
     }
 }

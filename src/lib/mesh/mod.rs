@@ -16,19 +16,6 @@ use std::collections::HashSet;
 use std::fmt;
 pub use types::*;
 
-#[derive(Copy, Clone)]
-pub enum Axis {
-    X,
-    Y,
-    Z,
-}
-
-pub enum MirrorMode {
-    None,
-    Bilateral,
-    Radial(u8),
-}
-
 pub struct Mesh {
     mirror_mode: MirrorMode,
     pub(crate) verticies: Vec<Vec3>,
@@ -88,6 +75,16 @@ impl Mesh {
         }
         self.cleanup_polys_after_point_removal(index, last_vert_index);
         return Some(removed_value);
+    }
+
+    pub fn delete_verts(&mut self, indicies: &[VertIndex]) {
+        let mut sorted_indicies: Vec<VertIndex> = indicies.to_vec();
+        sorted_indicies.sort_unstable();
+        sorted_indicies.dedup();
+        // Delete in reverse order to avoid index shifting issues
+        for index in sorted_indicies.into_iter().rev() {
+            self.delete_vert(index);
+        }
     }
 
     pub fn add_line(&mut self, line: Line) -> Option<()> {
