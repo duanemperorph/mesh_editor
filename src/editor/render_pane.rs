@@ -46,9 +46,9 @@ pub fn render_editor_pane_viewport(
     let rotation_matrix = Mat4::from_euler(EulerRot::XYZ, rotation.x, rotation.y, rotation.z);
     push_model_matrix(rotation_matrix);
 
-    let selected_verts = selection.selected_vert_indicies_set();
-    let selected_lines = mesh.lines_in_vertex_indicies(&selected_verts);
-    let selected_polys = mesh.polys_in_vertex_indicies(&selected_verts);
+    let selected_verts: HashSet<VertIndex> = selection.selected_vert_indicies_set();
+    let selected_lines: HashSet<LineIndex> = mesh.lines_in_vertex_indicies(&selected_verts);
+    let selected_polys: HashSet<PolyIndex> = mesh.polys_in_vertex_indicies(&selected_verts);
 
     render_mesh(mesh);
 

@@ -5,15 +5,11 @@
 
 use super::{LineIndex, Mesh, PolyIndex, VertIndex};
 use itertools::Itertools;
-use macroquad::prelude::vec2;
+use macroquad::prelude::*;
 use std::collections::HashSet;
 
 impl Mesh {
-    pub fn find_verts_xy(
-        &self,
-        target_coord_xy: macroquad::prelude::Vec2,
-        radius: f32,
-    ) -> Vec<VertIndex> {
+    pub fn find_verts_xy(&self, target_coord_xy: Vec2, radius: f32) -> Vec<VertIndex> {
         self.verticies
             .iter()
             .enumerate()
@@ -26,11 +22,7 @@ impl Mesh {
             .collect()
     }
 
-    pub fn find_verts_xz(
-        &self,
-        target_coord_xz: macroquad::prelude::Vec2,
-        radius: f32,
-    ) -> Vec<VertIndex> {
+    pub fn find_verts_xz(&self, target_coord_xz: Vec2, radius: f32) -> Vec<VertIndex> {
         self.verticies
             .iter()
             .enumerate()
@@ -43,11 +35,7 @@ impl Mesh {
             .collect()
     }
 
-    pub fn find_verts_yz(
-        &self,
-        target_coord_yz: macroquad::prelude::Vec2,
-        radius: f32,
-    ) -> Vec<VertIndex> {
+    pub fn find_verts_yz(&self, target_coord_yz: Vec2, radius: f32) -> Vec<VertIndex> {
         self.verticies
             .iter()
             .enumerate()
@@ -60,7 +48,10 @@ impl Mesh {
             .collect()
     }
 
-    pub fn lines_in_vertex_indicies(&self, index_set: &HashSet<VertIndex>) -> HashSet<LineIndex> {
+    pub fn lines_in_vertex_indicies<C>(&self, index_set: &HashSet<VertIndex>) -> C
+    where
+        C: FromIterator<LineIndex>,
+    {
         self.lines
             .iter()
             .enumerate()
@@ -69,7 +60,10 @@ impl Mesh {
             .collect()
     }
 
-    pub fn polys_in_vertex_indicies(&self, index_set: &HashSet<VertIndex>) -> HashSet<PolyIndex> {
+    pub fn polys_in_vertex_indicies<C>(&self, index_set: &HashSet<VertIndex>) -> C
+    where
+        C: FromIterator<LineIndex>,
+    {
         self.polys
             .iter()
             .enumerate()

@@ -3,7 +3,7 @@
 //
 
 use super::Mesh;
-use macroquad::prelude::Vec3;
+use macroquad::prelude::*;
 
 impl Mesh {
     pub fn new_cube() -> Mesh {

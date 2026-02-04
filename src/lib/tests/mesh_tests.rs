@@ -23,7 +23,7 @@
 // }
 
 use crate::mesh::{Line, Mesh, Poly};
-use macroquad::prelude::Vec3;
+use Vec3;
 
 #[cfg(test)]
 mod tests {

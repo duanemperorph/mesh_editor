@@ -3,6 +3,7 @@
 //
 
 use super::{Line, LineIndex, Mesh, VertIndex};
+use macroquad::prelude::*;
 use std::collections::HashSet;
 
 impl Mesh {
@@ -15,7 +16,7 @@ impl Mesh {
             .map(|(_, &l)| l)
             .collect();
 
-        let center_vecs: Vec<macroquad::prelude::Vec3> = self
+        let center_vecs: Vec<Vec3> = self
             .lines_to_vert_pairs_from_list(&lines_ordered)
             .iter()
             .map(|&(v1, v2)| (v1 + v2) / 2.0)

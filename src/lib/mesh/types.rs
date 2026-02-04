@@ -1,4 +1,4 @@
-use macroquad::prelude::Vec3;
+use macroquad::prelude::*;
 
 pub type VertIndex = usize;
 pub type LineIndex = usize;

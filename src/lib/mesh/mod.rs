@@ -3,17 +3,18 @@
 //
 
 mod bfs;
+mod duplicate;
 mod mutations;
 mod primitives;
 mod query;
 mod split;
 mod types;
 
-pub use types::*;
-
 use bfs::mesh_bfs;
+use macroquad::prelude::Vec3;
 use std::collections::HashSet;
 use std::fmt;
+pub use types::*;
 
 #[derive(Copy, Clone)]
 pub enum Axis {
@@ -30,7 +31,7 @@ pub enum MirrorMode {
 
 pub struct Mesh {
     mirror_mode: MirrorMode,
-    pub(crate) verticies: Vec<macroquad::prelude::Vec3>,
+    pub(crate) verticies: Vec<Vec3>,
     pub(crate) lines: Vec<Line>,
     pub(crate) polys: Vec<Poly>,
 }
@@ -45,7 +46,7 @@ impl Mesh {
         };
     }
 
-    pub fn verts(&self) -> &Vec<macroquad::prelude::Vec3> {
+    pub fn verts(&self) -> &Vec<Vec3> {
         &self.verticies
     }
 
@@ -65,17 +66,17 @@ impl Mesh {
         self.mirror_mode = mode;
     }
 
-    pub fn add_vert(&mut self, coord: macroquad::prelude::Vec3) -> VertIndex {
+    pub fn add_vert(&mut self, coord: Vec3) -> VertIndex {
         self.verticies.push(coord);
         return self.verticies.len() - 1;
     }
 
-    pub fn update_vert(&mut self, index: VertIndex, coord: macroquad::prelude::Vec3) -> Option<()> {
+    pub fn update_vert(&mut self, index: VertIndex, coord: Vec3) -> Option<()> {
         *self.verticies.get_mut(index as usize)? = coord;
         return Some(());
     }
 
-    pub fn delete_vert(&mut self, index: VertIndex) -> Option<macroquad::prelude::Vec3> {
+    pub fn delete_vert(&mut self, index: VertIndex) -> Option<Vec3> {
         if index >= self.verticies.len() {
             return None;
         }
@@ -115,10 +116,7 @@ impl Mesh {
         return Some(self.polys.swap_remove(index));
     }
 
-    pub fn selected_indicies_to_verts(
-        &self,
-        indicies: &[VertIndex],
-    ) -> Vec<macroquad::prelude::Vec3> {
+    pub fn selected_indicies_to_verts(&self, indicies: &[VertIndex]) -> Vec<Vec3> {
         self.verticies
             .iter()
             .enumerate()
@@ -128,39 +126,43 @@ impl Mesh {
             .collect()
     }
 
-    pub fn lines_to_vert_pairs(&self) -> Vec<(macroquad::prelude::Vec3, macroquad::prelude::Vec3)> {
+    pub fn selected_indicies_to_lines(&self, indicies: &[LineIndex]) -> Vec<Line> {
+        self.lines
+            .iter()
+            .enumerate()
+            .filter(|(i, _)| indicies.contains(i))
+            .map(|(_, l)| l)
+            .copied()
+            .collect()
+    }
+
+    pub fn selected_indicies_to_polys(&self, indicies: &[PolyIndex]) -> Vec<&Poly> {
+        self.polys
+            .iter()
+            .enumerate()
+            .filter(|(i, _)| indicies.contains(i))
+            .map(|(_, p)| p)
+            .collect()
+    }
+
+    pub fn lines_to_vert_pairs(&self) -> Vec<(Vec3, Vec3)> {
         return self
             .lines
             .iter()
             .map(|line| {
-                let v1 = *self
-                    .verticies
-                    .get(line.0)
-                    .unwrap_or(&macroquad::prelude::Vec3::ZERO);
-                let v2 = *self
-                    .verticies
-                    .get(line.1)
-                    .unwrap_or(&macroquad::prelude::Vec3::ZERO);
+                let v1 = *self.verticies.get(line.0).unwrap_or(&Vec3::ZERO);
+                let v2 = *self.verticies.get(line.1).unwrap_or(&Vec3::ZERO);
                 (v1, v2)
             })
             .collect();
     }
 
-    pub fn lines_to_vert_pairs_from_list(
-        &self,
-        lines: &[Line],
-    ) -> Vec<(macroquad::prelude::Vec3, macroquad::prelude::Vec3)> {
+    pub fn lines_to_vert_pairs_from_list(&self, lines: &[Line]) -> Vec<(Vec3, Vec3)> {
         lines
             .iter()
             .map(|line| {
-                let v1 = *self
-                    .verticies
-                    .get(line.0)
-                    .unwrap_or(&macroquad::prelude::Vec3::ZERO);
-                let v2 = *self
-                    .verticies
-                    .get(line.1)
-                    .unwrap_or(&macroquad::prelude::Vec3::ZERO);
+                let v1 = *self.verticies.get(line.0).unwrap_or(&Vec3::ZERO);
+                let v2 = *self.verticies.get(line.1).unwrap_or(&Vec3::ZERO);
                 (v1, v2)
             })
             .collect()
