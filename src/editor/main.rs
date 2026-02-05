@@ -19,8 +19,8 @@ use status_bar::*;
 mod panes;
 use panes::*;
 
-mod render_pane;
-use render_pane::*;
+mod renderer;
+use renderer::*;
 
 mod keyboard;
 
@@ -69,18 +69,21 @@ async fn main() {
                 document.current_mesh(),
                 &editor_state.selection(),
                 panes.left_viewport(),
+                editor_state.is_displaying_grid(),
             );
             render_editor_pane_viewport(
                 editor_state.panel_state_yz(),
                 document.current_mesh(),
                 &editor_state.selection(),
                 panes.top_right_viewport(),
+                editor_state.is_displaying_grid(),
             );
             render_editor_pane_viewport(
                 editor_state.panel_state_xy(),
                 document.current_mesh(),
                 &editor_state.selection(),
                 panes.bottom_right_viewport(),
+                editor_state.is_displaying_grid(),
             );
         } else {
             render_editor_pane_viewport(
@@ -88,6 +91,7 @@ async fn main() {
                 document.current_mesh(),
                 &editor_state.selection(),
                 panes.full_content_viewport(),
+                editor_state.is_displaying_grid(),
             );
         }
 

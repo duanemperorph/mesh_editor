@@ -32,6 +32,7 @@ pub struct EditorState {
     pending_insert_operation: Option<InsertOperation>,
     viewer_mode: ViewerMode,
     selected_axis: Axis,
+    is_displaying_grid: bool,
 }
 
 //
@@ -50,6 +51,7 @@ impl EditorState {
             viewer_mode: ViewerMode::EditorPanels,
             pending_insert_operation: None,
             selected_axis: Axis::X,
+            is_displaying_grid: true,
         }
     }
 
@@ -154,5 +156,13 @@ impl EditorState {
 
     pub fn set_selected_axis(&mut self, new_axis: Axis) {
         self.selected_axis = new_axis;
+    }
+
+    pub fn is_displaying_grid(&self) -> bool {
+        self.is_displaying_grid
+    }
+
+    pub fn toggle_displaying_grid(&mut self) {
+        self.is_displaying_grid = !self.is_displaying_grid;
     }
 }

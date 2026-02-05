@@ -73,6 +73,11 @@ fn handle_global_commands(editor_state: &mut EditorState, document: &mut MeshDoc
     {
         let _ = document.save_version();
     }
+
+    // toggle grid
+    if is_key_pressed(KeyCode::G) {
+        editor_state.toggle_displaying_grid();
+    }
 }
 
 //
