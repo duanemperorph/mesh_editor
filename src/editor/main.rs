@@ -36,6 +36,9 @@ use keyboard_commands::*;
 mod panel_ui_controls;
 use panel_ui_controls::*;
 
+mod mesh_document;
+use mesh_document::MeshDocument;
+
 #[macroquad::main("Mesh Editor")]
 async fn main() {
     let mut current_mesh = MeshData::new_tapered_box();

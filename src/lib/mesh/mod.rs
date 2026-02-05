@@ -7,17 +7,21 @@ mod duplicate;
 mod mutations;
 mod primitives;
 mod query;
+mod serialization;
 mod split;
 mod types;
 
 use bfs::mesh_bfs;
 use macroquad::prelude::Vec3;
+use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fmt;
 pub use types::*;
 
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct Mesh {
     mirror_mode: MirrorMode,
+    #[serde(with = "serialization::vec3_vec")]
     pub(crate) verticies: Vec<Vec3>,
     pub(crate) lines: Vec<Line>,
     pub(crate) polys: Vec<Poly>,
