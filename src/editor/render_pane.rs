@@ -9,6 +9,7 @@ use crate::selection::Selection;
 use macroquad::prelude::{Mesh as MacroMesh, *};
 use mesh_editor::mesh::{Mesh as MeshData, *};
 use std::collections::HashSet;
+use std::f32::consts::PI;
 
 pub trait PanelCameraVectors {
     fn to_target_vec(&self) -> Vec3;
@@ -45,20 +46,68 @@ pub fn render_editor_pane_viewport(
     let rotation = panel_state.to_model_rotation();
     let rotation_matrix = Mat4::from_euler(EulerRot::XYZ, rotation.x, rotation.y, rotation.z);
     push_model_matrix(rotation_matrix);
+    // match the mirror mode
+    match mesh.mirror_mode() {
+        MirrorMode::None => {
+            render_mesh(mesh, selection);
+        }
+        MirrorMode::Bilateral => {
+            render_bilateral_symmetry(mesh, selection);
+        }
+        MirrorMode::RadialX(count) => {
+            render_radial_symmetry(Axis::X, *count, mesh, selection);
+        }
+        MirrorMode::RadialY(count) => {
+            render_radial_symmetry(Axis::Y, *count, mesh, selection);
+        }
+        MirrorMode::RadialZ(count) => {
+            render_radial_symmetry(Axis::Z, *count, mesh, selection);
+        }
+    }
 
+    pop_model_matrix();
+}
+
+fn render_bilateral_symmetry(mesh: &MeshData, selection: &Selection) {
+    render_mesh(mesh, selection);
+    push_model_matrix(Mat4::from_scale(vec3(-1.0, 1.0, 1.0)));
+    render_mesh(mesh, selection);
+    pop_model_matrix();
+}
+
+fn render_radial_symmetry(axis: Axis, sides: u8, mesh: &MeshData, selection: &Selection) {
+    let rotation_delta = 2.0 * PI / (sides as f32);
+
+    for i in (0..sides) {
+        let rotation = rotation_delta * (i as f32);
+        render_mesh_rotated(axis, rotation, mesh, selection)
+    }
+}
+
+fn render_mesh_rotated(axis: Axis, rotation: f32, mesh: &MeshData, selection: &Selection) {
+    let rotation_mat = match axis {
+        Axis::X => Mat4::from_euler(EulerRot::XYZ, rotation, 0.0, 0.0),
+        Axis::Y => Mat4::from_euler(EulerRot::XYZ, 0.0, rotation, 0.0),
+        Axis::Z => Mat4::from_euler(EulerRot::XYZ, 0.0, 0.0, rotation),
+    };
+    push_model_matrix(rotation_mat);
+    render_mesh(mesh, selection);
+    pop_model_matrix();
+}
+
+fn render_mesh(mesh: &MeshData, selection: &Selection) {
     let selected_verts: HashSet<VertIndex> = selection.selected_vert_indicies_set();
     let selected_lines: HashSet<LineIndex> = mesh.lines_in_vertex_indicies(&selected_verts);
     let selected_polys: HashSet<PolyIndex> = mesh.polys_in_vertex_indicies(&selected_verts);
 
-    render_mesh(mesh);
+    render_triangles(mesh);
 
     if (selected_polys.len() > 0) {
-        render_mesh_selected_polys(mesh, &selected_polys);
+        render_triangles_selected_polys(mesh, &selected_polys);
     }
 
     render_lines(mesh, &selected_lines);
     render_points(mesh, &selected_verts);
-    pop_model_matrix()
 }
 
 fn render_points(mesh: &MeshData, selected_points: &HashSet<VertIndex>) {
@@ -93,7 +142,7 @@ fn render_lines(mesh: &MeshData, selected_lines: &HashSet<LineIndex>) {
 //
 // Render mesh in one go zoom zoom
 //
-fn render_mesh(mesh: &MeshData) {
+fn render_triangles(mesh: &MeshData) {
     let unselected_color = GRAY;
     let mesh = mesh_data_to_macro_mesh(mesh, unselected_color);
     draw_mesh(&mesh);
@@ -102,7 +151,7 @@ fn render_mesh(mesh: &MeshData) {
 //
 // Render mesh in one go zoom zoom
 //
-fn render_mesh_selected_polys(mesh: &MeshData, selected_polys: &HashSet<PolyIndex>) {
+fn render_triangles_selected_polys(mesh: &MeshData, selected_polys: &HashSet<PolyIndex>) {
     let selected_color = Color::new(0.5, 0.35, 0.35, 1.0);
     let mesh = selected_polys_to_macro_mesh(mesh, selected_polys, selected_color);
     draw_mesh(&mesh);
