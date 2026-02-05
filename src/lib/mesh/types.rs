@@ -20,5 +20,7 @@ pub enum Axis {
 pub enum MirrorMode {
     None,
     Bilateral,
-    Radial(u8),
+    RadialX(u8),
+    RadialY(u8),
+    RadialZ(u8),
 }

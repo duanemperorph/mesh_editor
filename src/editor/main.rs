@@ -58,7 +58,7 @@ async fn main() {
     loop {
         let panes = Panes::calc_from_screen_dims();
 
-        handle_keyboard_commands(&mut editor_state, document.current_mesh_mut());
+        handle_keyboard_commands(&mut editor_state, &mut document);
         handle_mouse_commands(&mut editor_state, document.current_mesh(), &panes);
 
         clear_background(BLACK);

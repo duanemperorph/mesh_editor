@@ -304,7 +304,9 @@ impl fmt::Display for MirrorMode {
         match self {
             Self::None => write!(formatter, "None"),
             Self::Bilateral => write!(formatter, "Bilateral"),
-            Self::Radial(axes) => write!(formatter, "Radial({})", axes),
+            Self::RadialX(count) => write!(formatter, "RadialX({})", count),
+            Self::RadialY(count) => write!(formatter, "RadialY({})", count),
+            Self::RadialZ(count) => write!(formatter, "RadialZ({})", count),
         }
     }
 }

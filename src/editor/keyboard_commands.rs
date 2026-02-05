@@ -4,13 +4,15 @@
 use crate::editor_state::*;
 use crate::insert_operation::*;
 use crate::keyboard::*;
+use crate::mesh_document::MeshDocument;
 use macroquad::prelude::*;
 use mesh_editor::mesh::{Mesh as MeshData, *};
 use std::collections::*;
 
-pub fn handle_keyboard_commands(editor_state: &mut EditorState, mesh: &mut MeshData) {
-    handle_global_commands(editor_state);
+pub fn handle_keyboard_commands(editor_state: &mut EditorState, document: &mut MeshDocument) {
+    handle_global_commands(editor_state, document);
 
+    let mesh = document.current_mesh_mut();
     match editor_state.input_mode() {
         InputMode::Select => handle_selection_commands(editor_state, mesh),
         InputMode::Insert | InputMode::Connect => handle_insert_commands(editor_state, mesh),
@@ -21,7 +23,7 @@ pub fn handle_keyboard_commands(editor_state: &mut EditorState, mesh: &mut MeshD
 //
 // Global commands
 //
-fn handle_global_commands(editor_state: &mut EditorState) {
+fn handle_global_commands(editor_state: &mut EditorState, document: &mut MeshDocument) {
     if is_key_pressed(KeyCode::Tab) {
         editor_state.toggle_viewer_mode();
     }
@@ -43,7 +45,8 @@ fn handle_global_commands(editor_state: &mut EditorState) {
         && is_key_down(KeyCode::LeftShift)
         && is_key_pressed(KeyCode::N)
     {
-        // TODO: clear/new mesh
+        document.current_mesh_mut().clear();
+        editor_state.selection_mut().clear();
     }
 
     // Undo (Cmd+Z)
@@ -51,15 +54,24 @@ fn handle_global_commands(editor_state: &mut EditorState) {
         && !is_key_down(KeyCode::LeftShift)
         && is_key_pressed(KeyCode::Z)
     {
-        // TODO: undo
+        document.restore_to_last_saved();
+        editor_state.selection_mut().clear();
     }
 
-    // Redo (Cmd+Shift+Z)
+    // Save (Cmd+S)
+    if is_key_down(KeyCode::LeftSuper)
+        && !is_key_down(KeyCode::LeftShift)
+        && is_key_pressed(KeyCode::S)
+    {
+        let _ = document.save_current();
+    }
+
+    // Version save (Cmd+Shift+S)
     if is_key_down(KeyCode::LeftSuper)
         && is_key_down(KeyCode::LeftShift)
-        && is_key_pressed(KeyCode::Z)
+        && is_key_pressed(KeyCode::S)
     {
-        // TODO: redo
+        let _ = document.save_version();
     }
 }
 
@@ -228,5 +240,53 @@ fn handle_selection_commands(editor_state: &mut EditorState, mesh: &mut MeshData
     // Extrude (Cmd+X)
     if modifier_keys.meta_key && is_key_pressed(KeyCode::X) {
         mesh.duplicate_verts(&selected_verts, true);
+    }
+
+    // Mirror Mode Update commands
+    if modifier_keys.alt_key && is_key_pressed(KeyCode::F1) {
+        mesh.set_mirror_mode(MirrorMode::None);
+    }
+    if modifier_keys.alt_key && is_key_pressed(KeyCode::F2) {
+        mesh.set_mirror_mode(MirrorMode::Bilateral);
+    }
+    if modifier_keys.alt_key && is_key_pressed(KeyCode::F5) {
+        mesh.set_mirror_mode(MirrorMode::RadialX(4));
+    }
+    if modifier_keys.alt_key && is_key_pressed(KeyCode::F6) {
+        mesh.set_mirror_mode(MirrorMode::RadialY(4));
+    }
+    if modifier_keys.alt_key && is_key_pressed(KeyCode::F7) {
+        mesh.set_mirror_mode(MirrorMode::RadialZ(4));
+    }
+
+    // Radial mirror sides commands: option+2-8
+    if modifier_keys.alt_key {
+        let new_count = if is_key_pressed(KeyCode::Key2) {
+            Some(2)
+        } else if is_key_pressed(KeyCode::Key3) {
+            Some(3)
+        } else if is_key_pressed(KeyCode::Key4) {
+            Some(4)
+        } else if is_key_pressed(KeyCode::Key5) {
+            Some(5)
+        } else if is_key_pressed(KeyCode::Key6) {
+            Some(6)
+        } else if is_key_pressed(KeyCode::Key7) {
+            Some(7)
+        } else if is_key_pressed(KeyCode::Key8) {
+            Some(8)
+        } else {
+            None
+        };
+
+        if let Some(count) = new_count {
+            let new_mode = match mesh.mirror_mode() {
+                MirrorMode::RadialX(_) => MirrorMode::RadialX(count),
+                MirrorMode::RadialY(_) => MirrorMode::RadialY(count),
+                MirrorMode::RadialZ(_) => MirrorMode::RadialZ(count),
+                _ => return,
+            };
+            mesh.set_mirror_mode(new_mode);
+        }
     }
 }
