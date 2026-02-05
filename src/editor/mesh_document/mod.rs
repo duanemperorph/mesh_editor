@@ -39,6 +39,16 @@ impl MeshDocument {
     }
 
     pub fn from_folder(folder_path: PathBuf) -> Result<Self, MeshDocumentError> {
+        Self::from_folder_with_default(folder_path, Mesh::new_tapered_box)
+    }
+
+    pub fn from_folder_with_default<F>(
+        folder_path: PathBuf,
+        default_mesh: F,
+    ) -> Result<Self, MeshDocumentError>
+    where
+        F: FnOnce() -> Mesh,
+    {
         if !folder_path.exists() {
             return Err(MeshDocumentError::DirectoryNotFound(folder_path));
         }
@@ -47,7 +57,7 @@ impl MeshDocument {
         let mesh = if current_file.exists() {
             Self::load_mesh_from_file(&current_file)?
         } else {
-            Mesh::new()
+            default_mesh()
         };
 
         Ok(MeshDocument {

@@ -2,8 +2,9 @@
 // mesh_editor: custom 3d mesh editor
 //
 
+use clap::Parser;
 use macroquad::prelude::*;
-use mesh_editor::mesh::{Mesh as MeshData, *};
+use std::process;
 
 mod editor_state;
 use editor_state::*;
@@ -37,11 +38,21 @@ mod panel_ui_controls;
 use panel_ui_controls::*;
 
 mod mesh_document;
-use mesh_document::MeshDocument;
+
+mod cli;
+use cli::Cli;
 
 #[macroquad::main("Mesh Editor")]
 async fn main() {
-    let mut document = MeshDocument::with_mesh(MeshData::new_tapered_box());
+    let cli = Cli::parse();
+
+    let mut document = match cli.load_document() {
+        Ok(doc) => doc,
+        Err(e) => {
+            eprintln!("Error: {}", e);
+            process::exit(1);
+        }
+    };
     let mut editor_state = EditorState::new();
 
     loop {
