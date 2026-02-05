@@ -13,12 +13,13 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 
-const AUTO_SAVE_INTERVAL_SECS: u64 = 60;
+const AUTO_SAVE_INTERVAL_SECS: u64 = 10;
 const CURRENT_MESH_FILENAME: &str = "current.mesh";
+const MAX_UNDO_STACK_SIZE: usize = 10;
 
 pub struct MeshDocument {
     current_mesh: Mesh,
-    last_saved_mesh: Option<Mesh>,
+    saved_mesh_stack: Vec<Mesh>,
     folder_path: PathBuf,
     last_auto_save_check: Instant,
 }
@@ -31,7 +32,7 @@ impl MeshDocument {
     pub fn with_mesh(mesh: Mesh) -> MeshDocument {
         MeshDocument {
             current_mesh: mesh,
-            last_saved_mesh: None,
+            saved_mesh_stack: Vec::new(),
             folder_path: PathBuf::new(),
             last_auto_save_check: Instant::now(),
         }
@@ -51,7 +52,7 @@ impl MeshDocument {
 
         Ok(MeshDocument {
             current_mesh: mesh.clone(),
-            last_saved_mesh: Some(mesh),
+            saved_mesh_stack: vec![mesh],
             folder_path,
             last_auto_save_check: Instant::now(),
         })
@@ -72,7 +73,7 @@ impl MeshDocument {
 
         Ok(MeshDocument {
             current_mesh: mesh.clone(),
-            last_saved_mesh: Some(mesh),
+            saved_mesh_stack: vec![mesh],
             folder_path,
             last_auto_save_check: Instant::now(),
         })
@@ -85,6 +86,18 @@ impl MeshDocument {
     pub fn current_mesh_mut(&mut self) -> &mut Mesh {
         &mut self.current_mesh
     }
+
+    ///
+    /// Restore to last saved version (from stack)
+    ///
+    pub fn restore_to_last_saved(&mut self) -> bool {
+        if let Some(saved) = self.saved_mesh_stack.pop() {
+            self.current_mesh = saved;
+            true
+        } else {
+            false
+        }
+    }
 }
 
 //
@@ -92,7 +105,7 @@ impl MeshDocument {
 //
 impl MeshDocument {
     pub fn has_unsaved_changes(&self) -> bool {
-        match &self.last_saved_mesh {
+        match self.saved_mesh_stack.last() {
             Some(saved) => self.current_mesh != *saved,
             None => true,
         }
@@ -127,7 +140,11 @@ impl MeshDocument {
 
         let path = self.folder_path.join(CURRENT_MESH_FILENAME);
         self.save_mesh_to_file(&self.current_mesh, &path)?;
-        self.last_saved_mesh = Some(self.current_mesh.clone());
+
+        if self.saved_mesh_stack.len() >= MAX_UNDO_STACK_SIZE {
+            self.saved_mesh_stack.remove(0);
+        }
+        self.saved_mesh_stack.push(self.current_mesh.clone());
         Ok(())
     }
 
@@ -150,19 +167,6 @@ impl MeshDocument {
         self.save_mesh_to_file(&self.current_mesh, &version_path)?;
 
         Ok(version)
-    }
-
-    ///
-    /// Restore to last saved version
-    /// TODO: Fix me
-    ///
-    pub fn restore_to_last_saved(&mut self) -> bool {
-        if let Some(ref saved) = self.last_saved_mesh {
-            self.current_mesh = saved.clone();
-            true
-        } else {
-            false
-        }
     }
 
     ///
