@@ -134,6 +134,14 @@ fn handle_selection_commands(editor_state: &mut EditorState, mesh: &mut MeshData
         editor_state.selection_mut().clear()
     }
 
+    // cmd+a = select all
+    if modifier_keys.meta_key && is_key_pressed(KeyCode::A) {
+        let all_verts: Vec<usize> = (0..mesh.verts().len()).collect();
+        editor_state
+            .selection_mut()
+            .replace_selected_vert_indicies(&all_verts);
+    }
+
     let selected_verts: Vec<usize> = editor_state.selection().selected_vert_indicies().clone();
 
     let delta = if modifier_keys.meta_key {
